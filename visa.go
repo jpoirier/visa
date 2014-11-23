@@ -297,7 +297,7 @@ func ViOpen(timeout ViUInt32, vi ViPSession) (status ViStatus) {
 // void     _VI_FUNC  viPoke64        (ViSession vi, ViAddr address, ViUInt64  val64);
 // #endif
 
-/*- Shared Memory Operations ------------------------------------------------*/
+// Shared Memory Operations
 
 // ViStatus _VI_FUNC  viMemAlloc      (ViSession vi, ViBusSize size, ViPBusAddress offset);
 // ViStatus _VI_FUNC  viMemFree       (ViSession vi, ViBusAddress offset);
@@ -307,7 +307,7 @@ func ViOpen(timeout ViUInt32, vi ViPSession) (status ViStatus) {
 // ViStatus _VI_FUNC  viMemFreeEx     (ViSession vi, ViBusAddress64 offset);
 // #endif
 
-/*- Interface Specific Operations -------------------------------------------*/
+// Interface Specific Operations
 
 // ViStatus _VI_FUNC  viGpibControlREN(ViSession vi, ViUInt16 mode);
 // ViStatus _VI_FUNC  viGpibControlATN(ViSession vi, ViUInt16 mode);
