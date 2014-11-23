@@ -21,7 +21,7 @@
 //     http://zone.ni.com/devzone/cda/tut/p/id/5458
 //
 // Direct download: http://download.ni.com/support/softlib/gpib/
-//
+
 package visa
 
 /*
