@@ -8,6 +8,7 @@ package visa
 import "C"
 
 const (
+	VI_SPEC_VERSION = C.VI_SPEC_VERSION
 	// Attributes (platform independent size)
 	VI_ATTR_RSRC_CLASS = C.VI_ATTR_RSRC_CLASS
 	VI_ATTR_RSRC_NAME = C.VI_ATTR_RSRC_NAME

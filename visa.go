@@ -24,71 +24,56 @@
 //
 package visa
 
-// TODO:
-// -
-
 /*
-#cgo linux LDFLAGS: -lgpibapi
+#cgo linux CFLAGS: -I.
+#cgo linux LDFLAGS: -lvisa
 #cgo darwin CFLAGS: -I.
 #cgo darwin LDFLAGS: -framework VISA
 #cgo windows CFLAGS: -I.
-#cgo windows LDFLAGS: -lgpib-32 -LC:/WINDOWS/system32
+#cgo windows LDFLAGS: -lvisa -LC:/WINDOWS/system32
 #include <stdlib.h>
-#if defined(__amd64) || defined(__amd64__) || defined(__x86_64) || defined(__x86_64__) && !defined(__APPLE__)
-#define size_g size_t
-#include <ni4882.h>
-#else
-#define size_g long
-#include <ni488.h>
-#endif
+#include <visa.h>
 */
 import "C"
-import "unsafe"
+
+//import "unsafe"
 
 var PackageVersion string = "v0.1"
 
 /*- VISA Types --------------------------------------------------------------*/
 
-typedef ViObject             ViEvent;
-typedef ViEvent      _VI_PTR ViPEvent;
-typedef ViObject             ViFindList;
-typedef ViFindList   _VI_PTR ViPFindList;
+type ViEvent C.ViEvent
+type ViPEvent C.ViPEvent
+type ViFindList C.ViFindList
+type ViPFindList C.ViPFindList
+type ViBusAddress C.ViBusAddress
+type ViBusSize C.ViBusSize
+type ViAttrState C.ViAttrState
 
-#if defined(_VI_INT64_UINT64_DEFINED) && defined(_VISA_ENV_IS_64_BIT)
-typedef ViUInt64             ViBusAddress;
-typedef ViUInt64             ViBusSize;
-typedef ViUInt64             ViAttrState;
-#else
-typedef ViUInt32             ViBusAddress;
-typedef ViUInt32             ViBusSize;
-typedef ViUInt32             ViAttrState;
-#endif
+// #if defined(_VI_INT64_UINT64_DEFINED)
+// typedef ViUInt64             ViBusAddress64;
+// typedef ViBusAddress64 _VI_PTR ViPBusAddress64;
+// #endif
 
-#if defined(_VI_INT64_UINT64_DEFINED)
-typedef ViUInt64             ViBusAddress64;
-typedef ViBusAddress64 _VI_PTR ViPBusAddress64;
-#endif
+type ViEventType C.ViEventType
+type ViPEventType C.ViPEventType
+type ViAEventType C.ViAEventType
+type ViPAttrState C.ViPAttrState
+type ViPAttr C.ViPAttr
+type ViAAttr C.ViAAttr
+type ViKeyId C.ViKeyId
+type ViPKeyId C.ViPKeyId
+type ViJobId C.ViJobId
+type ViPJobId C.ViPJobId
+type ViAccessMode C.ViAccessMode
+type ViPAccessMode C.ViPAccessMode
+type ViPBusAddress C.ViPBusAddress
+type ViEventFilter C.ViEventFilter
 
-typedef ViUInt32             ViEventType;
-typedef ViEventType  _VI_PTR ViPEventType;
-typedef ViEventType  _VI_PTR ViAEventType;
-typedef void         _VI_PTR ViPAttrState;
-typedef ViAttr       _VI_PTR ViPAttr;
-typedef ViAttr       _VI_PTR ViAAttr;
+type ViVAList C.ViVAList
 
-typedef ViString             ViKeyId;
-typedef ViPString            ViPKeyId;
-typedef ViUInt32             ViJobId;
-typedef ViJobId      _VI_PTR ViPJobId;
-typedef ViUInt32             ViAccessMode;
-typedef ViAccessMode _VI_PTR ViPAccessMode;
-typedef ViBusAddress _VI_PTR ViPBusAddress;
-typedef ViUInt32             ViEventFilter;
-
-typedef va_list              ViVAList;
-
-typedef ViStatus (_VI_FUNCH _VI_PTR ViHndlr)
-   (ViSession vi, ViEventType eventType, ViEvent event, ViAddr userHandle);
+// typedef ViStatus (_VI_FUNCH _VI_PTR ViHndlr)
+//    (ViSession vi, ViEventType eventType, ViEvent event, ViAddr userHandle);
 
 /*- Resource Manager Functions and Operations -------------------------------*/
 
@@ -98,7 +83,7 @@ func ViOpenDefaultRM(vi ViPSession) (status ViStatus) {
 }
 
 // ViStatus _VI_FUNC  viFindRsrc(ViSession sesn, ViString expr, ViPFindList vi,
-                                    // ViPUInt32 retCnt, ViChar _VI_FAR desc[]);
+// ViPUInt32 retCnt, ViChar _VI_FAR desc[]);
 func ViFindRsrc(sesn ViSession, expr ViString, vi ViPFindList,
 	retCnt ViPUInt32, desc []ViChar) (status ViStatus) {
 	status = C.viFindRsrc(sesn, expr, vi, retCnt, desc)
@@ -110,16 +95,16 @@ func ViFindNext(vi ViFindList, desc []ViChar) (status ViStatus) {
 }
 
 // ViStatus _VI_FUNC  viParseRsrc     (ViSession rmSesn, ViRsrc rsrcName,
-                                    // ViPUInt16 intfType, ViPUInt16 intfNum);
+// ViPUInt16 intfType, ViPUInt16 intfNum);
 func ViParseRsrc(rmSesn ViSession, rsrcName ViRsrc, intfType ViPUInt16,
 	intfNum ViPUInt16) (status ViStatus) {
 	status = C.viParseRsrc(rmSesn, rsrcName, intfType, intfNum)
 }
 
 // ViStatus _VI_FUNC  viParseRsrcEx   (ViSession rmSesn, ViRsrc rsrcName, ViPUInt16 intfType,
-                                    // ViPUInt16 intfNum, ViChar _VI_FAR rsrcClass[],
-                                    // ViChar _VI_FAR expandedUnaliasedName[],
-                                    // ViChar _VI_FAR aliasIfExists[]);
+// ViPUInt16 intfNum, ViChar _VI_FAR rsrcClass[],
+// ViChar _VI_FAR expandedUnaliasedName[],
+// ViChar _VI_FAR aliasIfExists[]);
 func ViParseRsrcEx(rmSesn ViSession, rsrcName ViRsrc, intfType ViPUInt16,
 	intfNum ViPUInt16, rsrcClass []ViChar, expandedUnaliasedName []ViChar,
 	aliasIfExists []ViChar) (status ViStatus) {
@@ -128,7 +113,7 @@ func ViParseRsrcEx(rmSesn ViSession, rsrcName ViRsrc, intfType ViPUInt16,
 }
 
 // ViStatus _VI_FUNC  viOpen          (ViSession sesn, ViRsrc name, ViAccessMode mode,
-                                    // ViUInt32 timeout, ViPSession vi);
+// ViUInt32 timeout, ViPSession vi);
 func ViOpen(timeout ViUInt32, vi ViPSession) (status ViStatus) {
 	status = C.viOpen(timeout, vi)
 }
