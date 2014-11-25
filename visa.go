@@ -125,7 +125,7 @@ func (sesn Session) ViFindRsrc(expr string) (findList uint32, retCnt uint32,
 
 // ViFindNext gets the next resource from the list of resources found during a
 // previous call to viFindRsrc.
-func (sesn Session) ViFindNext(findList uint32) (desc string, status ViStatus) {
+func ViFindNext(findList uint32) (desc string, status ViStatus) {
 	d := make([]byte, 257)
 	status = ViStatus(C.viFindNext((C.ViFindList)(findList),
 		(*C.ViChar)(unsafe.Pointer(&d[0]))))
@@ -166,7 +166,7 @@ func (sesn Session) ViParseRsrcEx(rsrcName string) (intfType uint16,
 }
 
 // ViOpen opens a session to the specified resource.
-func (sesn Session) ViOpen(name string, mode, timeout uint32) (vi Object,
+func (sesn Session) ViOpen(name string, mode, timeout uint32) (instr Object,
 	status ViStatus) {
 
 	cname := (*C.ViChar)(C.CString(name))
@@ -175,8 +175,8 @@ func (sesn Session) ViOpen(name string, mode, timeout uint32) (vi Object,
 		cname,
 		(C.ViAccessMode)(mode),
 		(C.ViUInt32)(timeout),
-		(*C.ViSession)(unsafe.Pointer(&vi))))
-	return vi, status
+		(*C.ViSession)(unsafe.Pointer(&instr))))
+	return instr, status
 }
 
 // Resource Template Operations
@@ -187,16 +187,14 @@ func (sesn Session) ViClose() (status ViStatus) {
 	return status
 }
 
-// ViSetAttribute Sets the state of an attribute.
-// func ViSetAttribute(vi, attribute, attrState uint32) (status ViStatus) {
-// 	status = ViStatus(C.viSetAttribute((C.ViObject)(vi),
-// 		(C.ViAttr)(attribute),
-// 		(C.ViAttrState)(attrState)))
-// 	return status
-// }
+func (instr Object) ViClose() (status ViStatus) {
+	status = ViStatus(C.viClose((C.ViObject)(instr)))
+	return status
+}
 
-func (vi Object) ViSetAttribute(attribute, attrState uint32) (status ViStatus) {
-	status = ViStatus(C.viSetAttribute((C.ViObject)(vi),
+// ViSetAttribute Sets the state of an attribute.
+func (instr Object) ViSetAttribute(attribute, attrState uint32) (status ViStatus) {
+	status = ViStatus(C.viSetAttribute((C.ViObject)(instr),
 		(C.ViAttr)(attribute),
 		(C.ViAttrState)(attrState)))
 	return status
@@ -225,22 +223,22 @@ func (vi Object) ViSetAttribute(attribute, attrState uint32) (status ViStatus) {
 // }
 
 // ViTerminate Requests a VISA session to terminate normal execution of an operation.
-func (vi Object) ViTerminate(degree, jobId uint16) (status ViStatus) {
-	status = ViStatus(C.viTerminate((C.ViObject)(vi),
+func (instr Object) ViTerminate(degree, jobId uint16) (status ViStatus) {
+	status = ViStatus(C.viTerminate((C.ViObject)(instr),
 		(C.ViUInt16)(degree),
 		(C.ViJobId)(jobId)))
 	return status
 }
 
 // ViLock Establishes an access mode to the specified resource.
-func (sesn Session) ViLock(lockType, timeout uint32, requestedKey string) (accessKey string,
+func (instr Object) ViLock(lockType, timeout uint32, requestedKey string) (accessKey string,
 	status ViStatus) {
 
 	crequestedKey := (*C.ViChar)(C.CString(requestedKey))
 	defer C.free(unsafe.Pointer(crequestedKey))
 
 	a := make([]byte, 257)
-	status = ViStatus(C.viLock((C.ViSession)(sesn),
+	status = ViStatus(C.viLock((C.ViSession)(instr),
 		(C.ViAccessMode)(lockType),
 		(C.ViUInt32)(timeout),
 		crequestedKey,
@@ -249,16 +247,16 @@ func (sesn Session) ViLock(lockType, timeout uint32, requestedKey string) (acces
 }
 
 // ViUnlock Relinquishes a lock for the specified resource.
-func (sesn Session) ViUnlock() (status ViStatus) {
-	status = ViStatus(C.viUnlock((C.ViSession)(sesn)))
+func (instr Object) ViUnlock() (status ViStatus) {
+	status = ViStatus(C.viUnlock((C.ViSession)(instr)))
 	return status
 }
 
 // ViEnableEvent Enables notification of a specified event.
-func (sesn Session) ViEnableEvent(eventType uint32, mechanism uint16,
+func (instr Object) ViEnableEvent(eventType uint32, mechanism uint16,
 	context uint32) (status ViStatus) {
 
-	status = ViStatus(C.viEnableEvent((C.ViSession)(sesn),
+	status = ViStatus(C.viEnableEvent((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism),
 		(C.ViEventFilter)(context)))
@@ -266,26 +264,26 @@ func (sesn Session) ViEnableEvent(eventType uint32, mechanism uint16,
 }
 
 // ViDisableEvent Disables notification of the specified event type(s) via the specified mechanism(s).
-func (sesn Session) ViDisableEvent(eventType uint32, mechanism uint16) (status ViStatus) {
-	status = ViStatus(C.viDisableEvent((C.ViSession)(sesn),
+func (instr Object) ViDisableEvent(eventType uint32, mechanism uint16) (status ViStatus) {
+	status = ViStatus(C.viDisableEvent((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism)))
 	return status
 }
 
 // ViDiscardEvents Discards event occurrences for specified event types and mechanisms in a session.
-func (sesn Session) ViDiscardEvents(eventType uint32, mechanism uint16) (status ViStatus) {
-	status = ViStatus(C.viDiscardEvents((C.ViSession)(sesn),
+func (instr Object) ViDiscardEvents(eventType uint32, mechanism uint16) (status ViStatus) {
+	status = ViStatus(C.viDiscardEvents((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism)))
 	return status
 }
 
 // ViWaitOnEvent Waits for an occurrence of the specified event for a given session.
-func (sesn Session) ViWaitOnEvent(inEventType, timeout uint32) (outEventType,
+func (instr Object) ViWaitOnEvent(inEventType, timeout uint32) (outEventType,
 	outContext uint32, status ViStatus) {
 
-	status = ViStatus(C.viWaitOnEvent((C.ViSession)(sesn),
+	status = ViStatus(C.viWaitOnEvent((C.ViSession)(instr),
 		(C.ViEventType)(inEventType),
 		(C.ViUInt32)(timeout),
 		(C.ViPEventType)(unsafe.Pointer(&outEventType)),
@@ -293,7 +291,7 @@ func (sesn Session) ViWaitOnEvent(inEventType, timeout uint32) (outEventType,
 	return outEventType, outContext, status
 }
 
-// ViInstallHandler nstalls handlers for event callbacks.
+// ViInstallHandler Installs handlers for event callbacks.
 // vi in
 // eventType in
 // handler in
