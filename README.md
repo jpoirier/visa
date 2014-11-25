@@ -12,6 +12,7 @@ to cross compile
 - use dave cheney's crosscompile to to build the 386 compiler
 - sudo su
 - export CGO_ENABLED=1
--
+- export GOARCH=386
+- go build visa,go defs.go
 
 for compile checks I created a stubbed 64-bit version of libvisa.so
