@@ -37,65 +37,7 @@ import "unsafe"
 
 var PackageVersion string = "v0.1"
 
-// VISA Types
-
-// type ViEvent uint32
-
-// type ViPEvent C.ViPEvent
-
-// type ViFindList uint32
-
-// type ViPFindList C.ViPFindList
-
-// type ViBusAddress uint32
-
-// type ViBusAddress uint64
-
-// type ViBusSize uint32
-
-// type ViBusSize uint64
-
-// type ViAttrState uint32
-
-// type ViAttrState uint64
-
-// #if defined(_VI_INT64_UINT64_DEFINED)
-// typedef ViUInt64             ViBusAddress64;
-// typedef ViBusAddress64 _VI_PTR ViPBusAddress64;
-// #endif
-
-// type ViEventType uint32
-
-// type ViPEventType C.ViPEventType
-
-// type ViAEventType C.ViAEventType
-// type ViPAttrState C.ViPAttrState
-// type ViPAttr C.ViPAttr
-// type ViAAttr C.ViAAttr
-// type ViKeyId C.ViKeyId
-// type ViPKeyId C.ViPKeyId
-// type ViJobId C.ViJobId
-// type ViPJobId C.ViPJobId
-
-// type ViAccessMode uint32
-// type ViPAccessMode C.ViPAccessMode
-// type ViPBusAddress C.ViPBusAddress
-// type ViEventFilter uint32
-
-// type ViVAList C.ViVAList
-
-// type ViPSession C.ViPSession
-// type ViSession uint32
-// type ViString string
-
-// type ViPUInt32 C.ViPUInt32
-// type ViChar int8
-// type ViRsrc string
-// type ViPUInt16 C.ViPUInt16
-// type ViUInt32 uint32
-
-type ViStatus C.ViStatus
-
+type ViStatus int32
 type Session uint32
 type Object uint32
 
@@ -205,7 +147,7 @@ func (instr Object) ViSetAttribute(attribute, attrState uint32) (status ViStatus
 // attrName in
 // attrValue out
 // ViStatus _VI_FUNC  viGetAttribute  (ViObject vi, ViAttr attrName, void _VI_PTR attrValue);
-// func ViGetAttribute(vi, attribute uint32) {
+// func (instr Object) ViGetAttribute(attribute uint32) {
 // 	cvi := (C.ViObject)(vi)
 // 	cattribute := (C.ViAttr)(attribute)
 
@@ -298,7 +240,7 @@ func (instr Object) ViWaitOnEvent(inEventType, timeout uint32) (outEventType,
 // userHandle in
 // ViStatus _VI_FUNC  viInstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
 //                                     ViAddr userHandle);
-// func ViInstallHandler(vi, eventType uint32) {
+// func (instr Object) ViInstallHandler(vi, eventType uint32) {
 // 	cvi := (C.ViSession)(vi)
 // 	return
 // }
@@ -310,24 +252,55 @@ func (instr Object) ViWaitOnEvent(inEventType, timeout uint32) (outEventType,
 // userHandle in
 // ViStatus _VI_FUNC  viUninstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
 //                                       ViAddr userHandle);
-// func ViUninstallHandler(vi uint32) {
+// func (instr Object) ViUninstallHandler(vi uint32) {
 // 	cvi := (C.ViSession)(vi)
 // 	return
 // }
 
 // Basic I/O Operations
 
-// ViStatus _VI_FUNC  viRead          (ViSession vi, ViPBuf buf, ViUInt32 cnt, ViPUInt32 retCnt);
-// ViStatus _VI_FUNC  viReadAsync     (ViSession vi, ViPBuf buf, ViUInt32 cnt, ViPJobId  jobId);
-// ViStatus _VI_FUNC  viReadToFile    (ViSession vi, ViConstString filename, ViUInt32 cnt,
+// ViRead Reads data from device or interface synchronously.
+func (instr Object) ViRead(cnt uint32) (buf []byte, retCnt uint32, status ViStatus) {
+	b := make([]byte, cnt)
+	status = ViStatus(C.viRead((C.ViSession)(instr),
+		(*C.ViByte)(unsafe.Pointer(&b[0])),
+		(C.ViUInt32)(cnt),
+		(*C.ViUInt32)(unsafe.Pointer(&retCnt))))
+	return buf, retCnt, status
+}
+
+// ViReadAsync Reads data from device or interface asynchronously.
+func (instr Object) ViReadAsync(cnt uint32) (buf []byte, jobId uint32, status ViStatus) {
+	b := make([]byte, cnt)
+	status = ViStatus(C.viReadAsync((C.ViSession)(instr),
+		(*C.ViByte)(unsafe.Pointer(&b[0])),
+		(C.ViUInt32)(cnt),
+		(*C.ViJobId)(unsafe.Pointer(&jobId))))
+	return buf, jobId, status
+}
+
+// ViReadToFile
+// ViStatus _VI_FUNC  viReadToFile(ViSession vi, ViConstString filename, ViUInt32 cnt,
 //                                     ViPUInt32 retCnt);
-// ViStatus _VI_FUNC  viWrite         (ViSession vi, ViBuf  buf, ViUInt32 cnt, ViPUInt32 retCnt);
-// ViStatus _VI_FUNC  viWriteAsync    (ViSession vi, ViBuf  buf, ViUInt32 cnt, ViPJobId  jobId);
-// ViStatus _VI_FUNC  viWriteFromFile (ViSession vi, ViConstString filename, ViUInt32 cnt,
+
+// ViWrite
+// ViStatus _VI_FUNC  viWrite(ViSession vi, ViBuf  buf, ViUInt32 cnt, ViPUInt32 retCnt);
+
+// ViWriteAsync
+// ViStatus _VI_FUNC  viWriteAsync(ViSession vi, ViBuf  buf, ViUInt32 cnt, ViPJobId  jobId);
+
+// ViWriteFromFile
+// ViStatus _VI_FUNC  viWriteFromFile(ViSession vi, ViConstString filename, ViUInt32 cnt,
 //                                     ViPUInt32 retCnt);
-// ViStatus _VI_FUNC  viAssertTrigger (ViSession vi, ViUInt16 protocol);
-// ViStatus _VI_FUNC  viReadSTB       (ViSession vi, ViPUInt16 status);
-// ViStatus _VI_FUNC  viClear         (ViSession vi);
+
+// ViAssertTrigger
+// ViStatus _VI_FUNC  viAssertTrigger(ViSession vi, ViUInt16 protocol);
+
+// ViReadSTB
+// ViStatus _VI_FUNC  viReadSTB(ViSession vi, ViPUInt16 status);
+
+// ViClear
+// ViStatus _VI_FUNC  viClear(ViSession vi);
 
 // Formatted and Buffered I/O Operations
 
