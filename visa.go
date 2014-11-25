@@ -22,11 +22,16 @@
 //
 // Direct download: http://download.ni.com/support/softlib/gpib/
 
+// export CGO_ENABLED=1
+// export GOARCH=386
+
 package visa
+
+import "unsafe"
 
 /*
 #cgo linux CFLAGS: -I.
-#cgo linux LDFLAGS: -lvisa
+#cgo linux LDFLAGS: -L. -lvisa
 #cgo darwin CFLAGS: -I.
 #cgo darwin LDFLAGS: -framework VISA
 #cgo windows CFLAGS: -I.
@@ -36,27 +41,39 @@ package visa
 */
 import "C"
 
-//import "unsafe"
-
 var PackageVersion string = "v0.1"
 
-/*- VISA Types --------------------------------------------------------------*/
+// VISA Types
 
-type ViEvent C.ViEvent
-type ViPEvent C.ViPEvent
-type ViFindList C.ViFindList
-type ViPFindList C.ViPFindList
-type ViBusAddress C.ViBusAddress
-type ViBusSize C.ViBusSize
-type ViAttrState C.ViAttrState
+type ViEvent uint32
+
+// type ViPEvent C.ViPEvent
+
+type ViFindList uint32
+
+// type ViPFindList C.ViPFindList
+
+type ViBusAddress uint32
+
+// type ViBusAddress uint64
+
+type ViBusSize uint32
+
+// type ViBusSize uint64
+
+type ViAttrState uint32
+
+// type ViAttrState uint64
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
 // typedef ViUInt64             ViBusAddress64;
 // typedef ViBusAddress64 _VI_PTR ViPBusAddress64;
 // #endif
 
-type ViEventType C.ViEventType
-type ViPEventType C.ViPEventType
+type ViEventType uint32
+
+// type ViPEventType C.ViPEventType
+
 type ViAEventType C.ViAEventType
 type ViPAttrState C.ViPAttrState
 type ViPAttr C.ViPAttr
@@ -65,82 +82,177 @@ type ViKeyId C.ViKeyId
 type ViPKeyId C.ViPKeyId
 type ViJobId C.ViJobId
 type ViPJobId C.ViPJobId
-type ViAccessMode C.ViAccessMode
+
+type ViAccessMode uint32
 type ViPAccessMode C.ViPAccessMode
 type ViPBusAddress C.ViPBusAddress
-type ViEventFilter C.ViEventFilter
+type ViEventFilter uint32
 
 type ViVAList C.ViVAList
+type ViStatus C.ViStatus
 
-// typedef ViStatus (_VI_FUNCH _VI_PTR ViHndlr)
-//    (ViSession vi, ViEventType eventType, ViEvent event, ViAddr userHandle);
+// type ViPSession C.ViPSession
+type ViSession uint32
+type ViString string
 
-/*- Resource Manager Functions and Operations -------------------------------*/
+// type ViPUInt32 C.ViPUInt32
+type ViChar int8
+type ViRsrc string
+type ViPUInt16 C.ViPUInt16
+type ViUInt32 uint32
 
-// ViStatus _VI_FUNC viOpenDefaultRM(ViPSession vi);
-func ViOpenDefaultRM(vi ViPSession) (status ViStatus) {
-	status = C.viOpenDefaultRM(vi)
+// Resource Manager Functions and Operations
+
+// ViOpenDefaultRM returns a session to the Default Resource Manager resource.
+func ViOpenDefaultRM() (vi uint32, status ViStatus) {
+
+	status = ViStatus(C.viOpenDefaultRM((C.ViPSession)(unsafe.Pointer(&vi))))
+	return
 }
 
-// ViStatus _VI_FUNC  viFindRsrc(ViSession sesn, ViString expr, ViPFindList vi,
-// ViPUInt32 retCnt, ViChar _VI_FAR desc[]);
-func ViFindRsrc(sesn ViSession, expr ViString, vi ViPFindList,
-	retCnt ViPUInt32, desc []ViChar) (status ViStatus) {
-	status = C.viFindRsrc(sesn, expr, vi, retCnt, desc)
+// ViFindRsrc queries a VISA system to locate the resources associated with a
+// specified interface.
+func ViFindRsrc(sesn uint32, expr string) (vi uint32, retCnt uint32,
+	desc string, status ViStatus) {
+
+	csesn := C.ViSession(sesn)
+	cexpr := (*C.ViChar)(C.CString(expr))
+	defer C.free(unsafe.Pointer(cexpr))
+
+	cvi := (*C.ViFindList)(unsafe.Pointer(&vi))
+	cretCnt := (*C.ViUInt32)(unsafe.Pointer(&retCnt))
+	cdesc := (*C.ViChar)(C.CString(desc))
+	defer C.free(unsafe.Pointer(cdesc))
+
+	status = ViStatus(C.viFindRsrc(csesn, cexpr, cvi, cretCnt, cdesc))
+	return
 }
 
-// ViStatus _VI_FUNC  viFindNext      (ViFindList vi, ViChar _VI_FAR desc[]);
-func ViFindNext(vi ViFindList, desc []ViChar) (status ViStatus) {
-	status = C.viFindNext(vi, desc)
+// ViFindNext gets the next resource from the list of resources found during a
+// previous call to viFindRsrc.
+func ViFindNext(vi uint32) (desc string, status ViStatus) {
+
+	cvi := (C.ViFindList)(vi)
+	cdesc := (*C.ViChar)(C.CString(desc))
+	defer C.free(unsafe.Pointer(cdesc))
+
+	status = ViStatus(C.viFindNext(cvi, cdesc))
+	return
 }
 
-// ViStatus _VI_FUNC  viParseRsrc     (ViSession rmSesn, ViRsrc rsrcName,
-// ViPUInt16 intfType, ViPUInt16 intfNum);
-func ViParseRsrc(rmSesn ViSession, rsrcName ViRsrc, intfType ViPUInt16,
-	intfNum ViPUInt16) (status ViStatus) {
-	status = C.viParseRsrc(rmSesn, rsrcName, intfType, intfNum)
+// ViParseRsrc parses a resource string to get the interface information.
+func ViParseRsrc(rmSesn uint32, rsrcName string) (intfType uint16,
+	intfNum uint16, status ViStatus) {
+
+	crmSesn := C.ViSession(rmSesn)
+	crsrcName := (*C.ViChar)(C.CString(rsrcName))
+	defer C.free(unsafe.Pointer(crsrcName))
+	cintfType := (*C.ViUInt16)(unsafe.Pointer(&intfType))
+	cintfNum := (*C.ViUInt16)(unsafe.Pointer(&intfNum))
+
+	status = ViStatus(C.viParseRsrc(crmSesn, crsrcName, cintfType, cintfNum))
+	return
 }
 
-// ViStatus _VI_FUNC  viParseRsrcEx   (ViSession rmSesn, ViRsrc rsrcName, ViPUInt16 intfType,
-// ViPUInt16 intfNum, ViChar _VI_FAR rsrcClass[],
-// ViChar _VI_FAR expandedUnaliasedName[],
-// ViChar _VI_FAR aliasIfExists[]);
-func ViParseRsrcEx(rmSesn ViSession, rsrcName ViRsrc, intfType ViPUInt16,
-	intfNum ViPUInt16, rsrcClass []ViChar, expandedUnaliasedName []ViChar,
-	aliasIfExists []ViChar) (status ViStatus) {
-	status = C.viParseRsrcEx(rmSesn, rsrcName, intfType, intfNum, rsrcClass,
-		expandedUnaliasedName, aliasIfExists)
+// ViParseRsrcEx parses a resource string to get extended interface information.
+func ViParseRsrcEx(rmSesn uint32, rsrcName string) (intfType uint16,
+	intfNum uint16, rsrcClass string, expandedUnaliasedName string,
+	aliasIfExists string, status ViStatus) {
+
+	crmSesn := C.ViSession(rmSesn)
+
+	crsrcName := (*C.ViChar)(C.CString(rsrcName))
+	defer C.free(unsafe.Pointer(crsrcName))
+
+	cintfType := (*C.ViUInt16)(unsafe.Pointer(&intfType))
+	cintfNum := (*C.ViUInt16)(unsafe.Pointer(&intfNum))
+
+	crsrcClass := (*C.ViChar)(C.CString(rsrcClass))
+	defer C.free(unsafe.Pointer(crsrcClass))
+
+	cexpandedUnaliasedName := (*C.ViChar)(C.CString(expandedUnaliasedName))
+	defer C.free(unsafe.Pointer(cexpandedUnaliasedName))
+
+	caliasIfExists := (*C.ViChar)(C.CString(aliasIfExists))
+	defer C.free(unsafe.Pointer(caliasIfExists))
+
+	status = ViStatus(C.viParseRsrcEx(crmSesn, crsrcName, cintfType,
+		cintfNum, crsrcClass, cexpandedUnaliasedName, caliasIfExists))
+	return
 }
 
-// ViStatus _VI_FUNC  viOpen          (ViSession sesn, ViRsrc name, ViAccessMode mode,
-// ViUInt32 timeout, ViPSession vi);
-func ViOpen(timeout ViUInt32, vi ViPSession) (status ViStatus) {
-	status = C.viOpen(timeout, vi)
+// ViOpen opens a session to the specified resource.
+func ViOpen(sesn uint32, name string, mode, timeout uint32) (vi uint32,
+	status ViStatus) {
+
+	csesn := C.ViSession(sesn)
+
+	cname := (*C.ViChar)(C.CString(name))
+	defer C.free(unsafe.Pointer(cname))
+
+	cmode := (C.ViAccessMode)(mode)
+
+	ctimeout := (C.ViUInt32)(timeout)
+
+	cvi := (*C.ViSession)(unsafe.Pointer(&timeout))
+
+	status = ViStatus(C.viOpen(csesn, cname, cmode, ctimeout, cvi))
+	return
 }
 
-/*- Resource Template Operations --------------------------------------------*/
+// Resource Template Operations
 
+// ViClose Closes the specified session, event, or find list.
 // ViStatus _VI_FUNC  viClose         (ViObject vi);
+func ViClose(vi uint32) (status ViStatus) {
+
+	cvi := (C.ViObject)(vi)
+	status = ViStatus(C.viClose(cvi))
+	return
+}
+
+// ViSetAttribute Sets the state of an attribute.
 // ViStatus _VI_FUNC  viSetAttribute  (ViObject vi, ViAttr attrName, ViAttrState attrValue);
+
+// ViGetAttribute Retrieves the state of an attribute.
 // ViStatus _VI_FUNC  viGetAttribute  (ViObject vi, ViAttr attrName, void _VI_PTR attrValue);
+
+// ViStatusDesc Returns a user-readable description of the status code passed to the operation.
 // ViStatus _VI_FUNC  viStatusDesc    (ViObject vi, ViStatus status, ViChar _VI_FAR desc[]);
+
+// ViTerminate Requests a VISA session to terminate normal execution of an operation.
 // ViStatus _VI_FUNC  viTerminate     (ViObject vi, ViUInt16 degree, ViJobId jobId);
 
+// ViLock Establishes an access mode to the specified resource.
 // ViStatus _VI_FUNC  viLock          (ViSession vi, ViAccessMode lockType, ViUInt32 timeout,
 //                                     ViKeyId requestedKey, ViChar _VI_FAR accessKey[]);
+
+// ViUnlock Relinquishes a lock for the specified resource.
 // ViStatus _VI_FUNC  viUnlock        (ViSession vi);
+
+// ViEnableEvent Enables notification of a specified event.
 // ViStatus _VI_FUNC  viEnableEvent   (ViSession vi, ViEventType eventType, ViUInt16 mechanism,
 //                                     ViEventFilter context);
+
+// ViDisableEvent Disables notification of the specified event type(s) via the specified mechanism(s).
 // ViStatus _VI_FUNC  viDisableEvent  (ViSession vi, ViEventType eventType, ViUInt16 mechanism);
+
+// ViDiscardEvents Discards event occurrences for specified event types and mechanisms in a session.
 // ViStatus _VI_FUNC  viDiscardEvents (ViSession vi, ViEventType eventType, ViUInt16 mechanism);
+
+// ViWaitOnEvent Waits for an occurrence of the specified event for a given session.
 // ViStatus _VI_FUNC  viWaitOnEvent   (ViSession vi, ViEventType inEventType, ViUInt32 timeout,
 //                                     ViPEventType outEventType, ViPEvent outContext);
+
+// ViInstallHandler nstalls handlers for event callbacks.
 // ViStatus _VI_FUNC  viInstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
 //                                     ViAddr userHandle);
+
+// ViUninstallHandler Uninstalls handlers for events.
 // ViStatus _VI_FUNC  viUninstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
 //                                       ViAddr userHandle);
 
-/*- Basic I/O Operations ----------------------------------------------------*/
+// Basic I/O Operations
 
 // ViStatus _VI_FUNC  viRead          (ViSession vi, ViPBuf buf, ViUInt32 cnt, ViPUInt32 retCnt);
 // ViStatus _VI_FUNC  viReadAsync     (ViSession vi, ViPBuf buf, ViUInt32 cnt, ViPJobId  jobId);
@@ -154,7 +266,7 @@ func ViOpen(timeout ViUInt32, vi ViPSession) (status ViStatus) {
 // ViStatus _VI_FUNC  viReadSTB       (ViSession vi, ViPUInt16 status);
 // ViStatus _VI_FUNC  viClear         (ViSession vi);
 
-/*- Formatted and Buffered I/O Operations -----------------------------------*/
+// Formatted and Buffered I/O Operations
 
 // ViStatus _VI_FUNC  viSetBuf        (ViSession vi, ViUInt16 mask, ViUInt32 size);
 // ViStatus _VI_FUNC  viFlush         (ViSession vi, ViUInt16 mask);
@@ -178,7 +290,7 @@ func ViOpen(timeout ViUInt32, vi ViPSession) (status ViStatus) {
 // ViStatus _VI_FUNC  viVQueryf       (ViSession vi, ViString writeFmt, ViString readFmt,
 //                                     ViVAList params);
 
-/*- Memory I/O Operations ---------------------------------------------------*/
+// Memory I/O Operations
 
 // ViStatus _VI_FUNC  viIn8           (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViPUInt8  val8);
