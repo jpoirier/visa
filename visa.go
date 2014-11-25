@@ -49,7 +49,7 @@ var viGetDefaultRM = ViOpenDefaultRM
 
 // ViFindRsrc queries a VISA system to locate the resources associated with a
 // specified interface.
-func (rm Session) ViFindRsrc(expr string) (findList uint32, retCnt uint32,
+func (rm Session) ViFindRsrc(expr string) (findList, retCnt uint32,
 	desc string, status ViStatus) {
 
 	cexpr := (*C.ViChar)(C.CString(expr))
@@ -73,8 +73,8 @@ func ViFindNext(findList uint32) (desc string, status ViStatus) {
 }
 
 // ViParseRsrc parses a resource string to get the interface information.
-func (rm Session) ViParseRsrc(rsrcName string) (intfType uint16,
-	intfNum uint16, status ViStatus) {
+func (rm Session) ViParseRsrc(rsrcName string) (intfType, intfNum uint16,
+	status ViStatus) {
 
 	crsrcName := (*C.ViChar)(C.CString(rsrcName))
 	defer C.free(unsafe.Pointer(crsrcName))
@@ -86,9 +86,9 @@ func (rm Session) ViParseRsrc(rsrcName string) (intfType uint16,
 }
 
 // ViParseRsrcEx parses a resource string to get extended interface information.
-func (rm Session) ViParseRsrcEx(rsrcName string) (intfType uint16,
-	intfNum uint16, rsrcClass string, expandedUnaliasedName string,
-	aliasIfExists string, status ViStatus) {
+func (rm Session) ViParseRsrcEx(rsrcName string) (intfType, intfNum uint16,
+	rsrcClass, expandedUnaliasedName, aliasIfExists string,
+	status ViStatus) {
 
 	crsrcName := (*C.ViChar)(C.CString(rsrcName))
 	defer C.free(unsafe.Pointer(crsrcName))
@@ -127,14 +127,14 @@ func (rm Session) ViClose() (status ViStatus) {
 	return status
 }
 
-func (instr Object) ViClose() (status ViStatus) {
-	status = ViStatus(C.viClose((C.ViObject)(instr)))
+func (instr Object) ViClose() ViStatus {
+	status := ViStatus(C.viClose((C.ViObject)(instr)))
 	return status
 }
 
 // ViSetAttribute Sets the state of an attribute.
-func (instr Object) ViSetAttribute(attribute, attrState uint32) (status ViStatus) {
-	status = ViStatus(C.viSetAttribute((C.ViObject)(instr),
+func (instr Object) ViSetAttribute(attribute, attrState uint32) ViStatus {
+	status := ViStatus(C.viSetAttribute((C.ViObject)(instr),
 		(C.ViAttr)(attribute),
 		(C.ViAttrState)(attrState)))
 	return status
@@ -154,7 +154,7 @@ func (instr Object) ViSetAttribute(attribute, attrState uint32) (status ViStatus
 
 // ViStatusDesc Returns a user-readable description of the status code
 // passed to the operation.
-func (instr Object) ViStatusDesc(status ViStatus) (desc string) {
+func (instr Object) ViStatusDesc(status ViStatus) string {
 	d := make([]byte, 257)
 	status = ViStatus(C.viStatusDesc((C.ViObject)(instr),
 		(C.ViStatus)(status),
@@ -163,22 +163,22 @@ func (instr Object) ViStatusDesc(status ViStatus) (desc string) {
 }
 
 // ViTerminate Requests a VISA session to terminate normal execution of an operation.
-func (instr Object) ViTerminate(degree, jobId uint16) (status ViStatus) {
-	status = ViStatus(C.viTerminate((C.ViObject)(instr),
+func (instr Object) ViTerminate(degree, jobId uint16) ViStatus {
+	status := ViStatus(C.viTerminate((C.ViObject)(instr),
 		(C.ViUInt16)(degree),
 		(C.ViJobId)(jobId)))
 	return status
 }
 
 // ViLock Establishes an access mode to the specified resource.
-func (instr Object) ViLock(lockType, timeout uint32, requestedKey string) (accessKey string,
-	status ViStatus) {
+func (instr Object) ViLock(lockType, timeout uint32, requestedKey string) (string,
+	ViStatus) {
 
 	crequestedKey := (*C.ViChar)(C.CString(requestedKey))
 	defer C.free(unsafe.Pointer(crequestedKey))
 
 	a := make([]byte, 257)
-	status = ViStatus(C.viLock((C.ViSession)(instr),
+	status := ViStatus(C.viLock((C.ViSession)(instr),
 		(C.ViAccessMode)(lockType),
 		(C.ViUInt32)(timeout),
 		crequestedKey,
@@ -187,16 +187,16 @@ func (instr Object) ViLock(lockType, timeout uint32, requestedKey string) (acces
 }
 
 // ViUnlock Relinquishes a lock for the specified resource.
-func (instr Object) ViUnlock() (status ViStatus) {
-	status = ViStatus(C.viUnlock((C.ViSession)(instr)))
+func (instr Object) ViUnlock() ViStatus {
+	status := ViStatus(C.viUnlock((C.ViSession)(instr)))
 	return status
 }
 
 // ViEnableEvent Enables notification of a specified event.
 func (instr Object) ViEnableEvent(eventType uint32, mechanism uint16,
-	context uint32) (status ViStatus) {
+	context uint32) ViStatus {
 
-	status = ViStatus(C.viEnableEvent((C.ViSession)(instr),
+	status := ViStatus(C.viEnableEvent((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism),
 		(C.ViEventFilter)(context)))
@@ -205,8 +205,8 @@ func (instr Object) ViEnableEvent(eventType uint32, mechanism uint16,
 
 // ViDisableEvent Disables notification of the specified event type(s)
 // via the specified mechanism(s).
-func (instr Object) ViDisableEvent(eventType uint32, mechanism uint16) (status ViStatus) {
-	status = ViStatus(C.viDisableEvent((C.ViSession)(instr),
+func (instr Object) ViDisableEvent(eventType uint32, mechanism uint16) ViStatus {
+	status := ViStatus(C.viDisableEvent((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism)))
 	return status
@@ -214,8 +214,8 @@ func (instr Object) ViDisableEvent(eventType uint32, mechanism uint16) (status V
 
 // ViDiscardEvents Discards event occurrences for specified event types
 // and mechanisms in a session.
-func (instr Object) ViDiscardEvents(eventType uint32, mechanism uint16) (status ViStatus) {
-	status = ViStatus(C.viDiscardEvents((C.ViSession)(instr),
+func (instr Object) ViDiscardEvents(eventType uint32, mechanism uint16) ViStatus {
+	status := ViStatus(C.viDiscardEvents((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism)))
 	return status
@@ -268,7 +268,7 @@ func (instr Object) ViRead(cnt uint32) (buf []byte, retCnt uint32,
 		(*C.ViByte)(unsafe.Pointer(&b[0])),
 		(C.ViUInt32)(cnt),
 		(*C.ViUInt32)(unsafe.Pointer(&retCnt))))
-	return buf, retCnt, status
+	return b, retCnt, status
 }
 
 // ViReadAsync Reads data from device or interface asynchronously.
@@ -280,7 +280,7 @@ func (instr Object) ViReadAsync(cnt uint32) (buf []byte, jobId uint32,
 		(*C.ViByte)(unsafe.Pointer(&b[0])),
 		(C.ViUInt32)(cnt),
 		(*C.ViJobId)(unsafe.Pointer(&jobId))))
-	return buf, jobId, status
+	return b, jobId, status
 }
 
 // ViReadToFile Reads data synchronously and stores the transferred
@@ -298,7 +298,6 @@ func (instr Object) ViReadToFile(filename string, cnt uint32) (retCnt uint32,
 }
 
 // ViWrite Writes data to a device or interface synchronously.
-// ViStatus _VI_FUNC  viWrite(ViSession vi, ViBuf  buf, ViUInt32 cnt, ViPUInt32 retCnt);
 func (instr Object) ViWrite(buf []byte, cnt uint32) (retCnt uint32,
 	status ViStatus) {
 
@@ -334,8 +333,8 @@ func (instr Object) ViWriteFromFile(filename string, cnt uint32) (retCnt uint32,
 }
 
 // ViAssertTrigger Asserts software or hardware trigger.
-func (instr Object) ViAssertTrigger(protocol uint16) (status ViStatus) {
-	status = ViStatus(C.viAssertTrigger((C.ViSession)(instr),
+func (instr Object) ViAssertTrigger(protocol uint16) ViStatus {
+	status := ViStatus(C.viAssertTrigger((C.ViSession)(instr),
 		(C.ViUInt16)(protocol)))
 	return status
 }
@@ -348,8 +347,8 @@ func (instr Object) ViReadSTB() (stb_stat uint16, status ViStatus) {
 }
 
 // ViClear Clears a device.
-func (instr Object) ViClear() (status ViStatus) {
-	status = ViStatus(C.viClear((C.ViSession)(instr)))
+func (instr Object) ViClear() ViStatus {
+	status := ViStatus(C.viClear((C.ViSession)(instr)))
 	return status
 }
 
@@ -357,8 +356,8 @@ func (instr Object) ViClear() (status ViStatus) {
 
 // ViSetBuf Sets the size for the formatted I/O and/or low-level
 // I/O communication buffer(s).
-func (instr Object) ViSetBuf(mask uint16, size uint32) (status ViStatus) {
-	status = ViStatus(C.viSetBuf((C.ViSession)(instr),
+func (instr Object) ViSetBuf(mask uint16, size uint32) ViStatus {
+	status := ViStatus(C.viSetBuf((C.ViSession)(instr),
 		(C.ViUInt16)(mask),
 		(C.ViUInt32)(size)))
 	return status
@@ -366,15 +365,13 @@ func (instr Object) ViSetBuf(mask uint16, size uint32) (status ViStatus) {
 
 // ViFlush Manually flushes the specified buffers associated with
 // formatted I/O operations and/or serial communication.
-// ViStatus _VI_FUNC  viFlush         (ViSession vi, ViUInt16 mask);
-func (instr Object) ViFlush(mask uint16) (status ViStatus) {
-	status = ViStatus(C.viFlush((C.ViSession)(instr),
+func (instr Object) ViFlush(mask uint16) ViStatus {
+	status := ViStatus(C.viFlush((C.ViSession)(instr),
 		(C.ViUInt16)(mask)))
 	return status
 }
 
 // ViBufWrite Writes data to a formatted I/O write buffer synchronously.
-// ViStatus _VI_FUNC  viBufWrite      (ViSession vi, ViBuf  buf, ViUInt32 cnt, ViPUInt32 retCnt);
 func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
 	status ViStatus) {
 
@@ -385,73 +382,100 @@ func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
 	return retCnt, status
 }
 
-// ViBufRead
-// ViStatus _VI_FUNC  viBufRead       (ViSession vi, ViPBuf buf, ViUInt32 cnt, ViPUInt32 retCnt);
+// ViBufRead Reads data from a device or interface through the use of
+// a formatted I/O read buffer.
+func (instr Object) ViBufRead(cnt uint32) (buf []byte, retCnt uint32,
+	status ViStatus) {
 
-// ViPrintf
+	b := make([]byte, cnt)
+	status = ViStatus(C.viBufRead((C.ViSession)(instr),
+		(C.ViBuf)(unsafe.Pointer(&b[0])),
+		(C.ViUInt32)(cnt),
+		(*C.ViUInt32)(unsafe.Pointer(&retCnt))))
+	return b, retCnt, status
+}
+
+// ViPrintf Converts, formats, and sends the parameters (designated by ...)
+// to the device as specified by the format string.
 // ViStatus _VI_FUNCC viPrintf        (ViSession vi, ViString writeFmt, ...);
 
-// ViVPrintf
+// ViVPrintf Converts, formats, and sends the parameters designated by params
+// to the device or interface as specified by the format string.
 // ViStatus _VI_FUNC  viVPrintf       (ViSession vi, ViString writeFmt, ViVAList params);
 
-// ViSPrintf
+// ViSPrintf Converts, formats, and sends the parameters (designated by ...)
+// to a user-specified buffer as specified by the format string.
 // ViStatus _VI_FUNCC viSPrintf       (ViSession vi, ViPBuf buf, ViString writeFmt, ...);
 
-// ViVSPrintf
+// ViVSPrintf Converts, formats, and sends the parameters designated by params
+// to a user-specified buffer as specified by the format string.
 // ViStatus _VI_FUNC  viVSPrintf      (ViSession vi, ViPBuf buf, ViString writeFmt,
 //                                     ViVAList parms);
 
-// ViScanf
+// ViScanf Reads, converts, and formats data using the format specifier.
+// Stores the formatted data in the parameters (designated by ...).
 // ViStatus _VI_FUNCC viScanf         (ViSession vi, ViString readFmt, ...);
 
-// ViVScanf
+// ViVScanf Reads, converts, and formats data using the format specifier.
+// Stores the formatted data in the parameters designated by params.
 // ViStatus _VI_FUNC  viVScanf        (ViSession vi, ViString readFmt, ViVAList params);
 
-// ViSScanf
+// ViSScanf Reads, converts, and formats data from a user-specified buffer
+// using the format specifier. Stores the formatted data in the parameters
+// (designated by ...).
 // ViStatus _VI_FUNCC viSScanf        (ViSession vi, ViBuf buf, ViString readFmt, ...);
 
-// ViVSScanf
+// ViVSScanf Reads, converts, and formats data from a user-specified buffer
+// using the format specifier. Stores the formatted data in the parameters
+// designated by params.
 // ViStatus _VI_FUNC  viVSScanf       (ViSession vi, ViBuf buf, ViString readFmt,
 //                                     ViVAList parms);
 
-// ViQueryf
+// ViQueryf Performs a formatted write and read through a single call
+// to an operation.
 // ViStatus _VI_FUNCC viQueryf        (ViSession vi, ViString writeFmt, ViString readFmt, ...);
 
-// ViVQueryf
+// ViVQueryf Performs a formatted write and read through a single call
+// to an operation.
 // ViStatus _VI_FUNC  viVQueryf       (ViSession vi, ViString writeFmt, ViString readFmt,
 //                                     ViVAList params);
 
 // Memory I/O Operations
 
-// ViIn8
+// ViIn8 Reads in an 8-bit value from the specified memory space and offset.
 // ViStatus _VI_FUNC  viIn8           (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViPUInt8  val8);
 
-// ViOut8
+// ViOut8 Writes an 8-bit value to the specified memory space and offset.
 // ViStatus _VI_FUNC  viOut8          (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViUInt8   val8);
 
-// ViIn16
+// ViIn16 Reads in an 16-bit value from the specified memory space and offset.
 // ViStatus _VI_FUNC  viIn16          (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViPUInt16 val16);
 
-// ViOut16
+// ViOut16 Writes an 16-bit value to the specified memory space and offset.
 // ViStatus _VI_FUNC  viOut16         (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViUInt16  val16);
 
-// ViIn32
+// ViIn32 Reads in an 32-bit value from the specified memory space and offset.
 // ViStatus _VI_FUNC  viIn32          (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViPUInt32 val32);
 
-// ViOut32
+// ViOut32 Writes an 32-bit value to the specified memory space and offset.
 // ViStatus _VI_FUNC  viOut32         (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViUInt32  val32);
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
+
+// ViIn64 Reads in an 64-bit value from the specified memory space and offset.
 // ViStatus _VI_FUNC  viIn64          (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViPUInt64 val64);
+
+// ViOut64 Writes an 64-bit value to the specified memory space and offset.
 // ViStatus _VI_FUNC  viOut64         (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViUInt64  val64);
+
 // ViStatus _VI_FUNC  viIn8Ex         (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress64 offset, ViPUInt8  val8);
 // ViStatus _VI_FUNC  viOut8Ex        (ViSession vi, ViUInt16 space,
@@ -470,27 +494,33 @@ func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
 //                                     ViBusAddress64 offset, ViUInt64  val64);
 // #endif
 
-// ViMoveIn8
+// ViMoveIn8 Moves a block of data from the specified address space and
+// offset to local memory.
 // ViStatus _VI_FUNC  viMoveIn8       (ViSession vi, ViUInt16 space, ViBusAddress offset,
 //                                     ViBusSize length, ViAUInt8  buf8);
 
-// ViMoveOut8
+// ViMoveOut8 Moves a block of data from local memory to the specified
+// address space and offset.
 // ViStatus _VI_FUNC  viMoveOut8      (ViSession vi, ViUInt16 space, ViBusAddress offset,
 //                                     ViBusSize length, ViAUInt8  buf8);
 
-// ViMoveIn16
+// ViMoveIn16 Moves a block of data from the specified address space and
+// offset to local memory.
 // ViStatus _VI_FUNC  viMoveIn16      (ViSession vi, ViUInt16 space, ViBusAddress offset,
 //                                     ViBusSize length, ViAUInt16 buf16);
 
-// ViMoveOut16
+// ViMoveOut16 Moves a block of data from local memory to the specified
+// address space and offset.
 // ViStatus _VI_FUNC  viMoveOut16     (ViSession vi, ViUInt16 space, ViBusAddress offset,
 //                                     ViBusSize length, ViAUInt16 buf16);
 
-// ViMoveIn32
+// ViMoveIn32 Moves a block of data from the specified address space and
+// offset to local memory.
 // ViStatus _VI_FUNC  viMoveIn32      (ViSession vi, ViUInt16 space, ViBusAddress offset,
 //                                     ViBusSize length, ViAUInt32 buf32);
 
-// ViMoveOut32
+// ViMoveOut32 Moves a block of data from local memory to the specified
+// address space and offset.
 // ViStatus _VI_FUNC  viMoveOut32     (ViSession vi, ViUInt16 space, ViBusAddress offset,
 //                                     ViBusSize length, ViAUInt32 buf32);
 
@@ -517,13 +547,13 @@ func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
 //                                     ViBusSize length, ViAUInt64 buf64);
 // #endif
 
-// ViMove
+// ViMove Moves a block of data.
 // ViStatus _VI_FUNC  viMove          (ViSession vi, ViUInt16 srcSpace, ViBusAddress srcOffset,
 //                                     ViUInt16 srcWidth, ViUInt16 destSpace,
 //                                     ViBusAddress destOffset, ViUInt16 destWidth,
 //                                     ViBusSize srcLength);
 
-// ViMoveAsync
+// ViMoveAsync Moves a block of data asynchronously.
 // ViStatus _VI_FUNC  viMoveAsync     (ViSession vi, ViUInt16 srcSpace, ViBusAddress srcOffset,
 //                                     ViUInt16 srcWidth, ViUInt16 destSpace,
 //                                     ViBusAddress destOffset, ViUInt16 destWidth,
@@ -540,12 +570,13 @@ func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
 //                                     ViBusSize srcLength, ViPJobId jobId);
 // #endif
 
-// ViMapAddress
+// ViMapAddress Maps the specified memory space into the process’s
+// address space.
 // ViStatus _VI_FUNC  viMapAddress    (ViSession vi, ViUInt16 mapSpace, ViBusAddress mapOffset,
 //                                     ViBusSize mapSize, ViBoolean access,
 //                                     ViAddr suggested, ViPAddr address);
 
-// ViUnmapAddress
+// ViUnmapAddress Unmaps memory space previously mapped by ViMapAddress().
 // ViStatus _VI_FUNC  viUnmapAddress  (ViSession vi);
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
@@ -554,35 +585,38 @@ func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
 //                                     ViAddr suggested, ViPAddr address);
 // #endif
 
-// ViPeek8
+// ViPeek8 Reads an 8-bit value from the specified address.
 // void     _VI_FUNC  viPeek8         (ViSession vi, ViAddr address, ViPUInt8  val8);
 
-// ViPoke8
+// ViPoke8 Writes an 8-bit value to the specified address.
 // void     _VI_FUNC  viPoke8         (ViSession vi, ViAddr address, ViUInt8   val8);
 
-// ViPeek16
+// ViPeek16 Reads an 16-bit value from the specified address.
 // void     _VI_FUNC  viPeek16        (ViSession vi, ViAddr address, ViPUInt16 val16);
 
-// ViPoke16
+// ViPoke16 Writes an 16-bit value to the specified address.
 // void     _VI_FUNC  viPoke16        (ViSession vi, ViAddr address, ViUInt16  val16);
 
-// ViPeek32
+// ViPeek32 Reads an 32-bit value from the specified address.
 // void     _VI_FUNC  viPeek32        (ViSession vi, ViAddr address, ViPUInt32 val32);
 
-// VSiPoke32
+// ViPoke32 Writes an 32-bit value to the specified address.
 // void     _VI_FUNC  viPoke32        (ViSession vi, ViAddr address, ViUInt32  val32);
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
+// Reads an 64-bit value from the specified address.
 // void     _VI_FUNC  viPeek64        (ViSession vi, ViAddr address, ViPUInt64 val64);
+
+// Writes an 64-bit value to the specified address.
 // void     _VI_FUNC  viPoke64        (ViSession vi, ViAddr address, ViUInt64  val64);
 // #endif
 
 // Shared Memory Operations
 
-// ViMemAlloc
+// ViMemAlloc Allocates memory from a device’s memory region.
 // ViStatus _VI_FUNC  viMemAlloc      (ViSession vi, ViBusSize size, ViPBusAddress offset);
 
-// ViMemFree
+// ViMemFree Frees memory previously allocated using the viMemAlloc() operation.
 // ViStatus _VI_FUNC  viMemFree       (ViSession vi, ViBusAddress offset);
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
@@ -592,51 +626,54 @@ func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
 
 // Interface Specific Operations
 
-// viGpibControlREN
+// ViGpibControlREN Controls the state of the GPIB Remote Enable (REN)
+// interface line, and optionally the remote/local state of the device.
 // ViStatus _VI_FUNC  viGpibControlREN(ViSession vi, ViUInt16 mode);
 
-// viGpibControlATN
+// ViGpibControlATN Specifies the state of the ATN line and the local
+// active controller state.
 // ViStatus _VI_FUNC  viGpibControlATN(ViSession vi, ViUInt16 mode);
 
-// viGpibSendIFC
+// ViGpibSendIFC Pulse the interface clear line (IFC) for at least
+// 100 microseconds.
 // ViStatus _VI_FUNC  viGpibSendIFC   (ViSession vi);
 
-// viGpibCommand
+// ViGpibCommand Write GPIB command bytes on the bus.
 // ViStatus _VI_FUNC  viGpibCommand   (ViSession vi, ViBuf cmd, ViUInt32 cnt, ViPUInt32 retCnt);
 
-// viGpibPassControl
+// ViGpibPassControl Tell the GPIB device at the specified address to
+// become controller in charge (CIC).
 // ViStatus _VI_FUNC  viGpibPassControl(ViSession vi, ViUInt16 primAddr, ViUInt16 secAddr);
 
-// viVxiCommandQuery
+// ViVxiCommandQuery Sends the device a miscellaneous command or query and/or
+// retrieves the response to a previous query.
 // ViStatus _VI_FUNC  viVxiCommandQuery(ViSession vi, ViUInt16 mode, ViUInt32 cmd,
 //                                      ViPUInt32 response);
 
-// viAssertUtilSignal
+// ViAssertUtilSignal Asserts or deasserts the specified utility bus signal.
 // ViStatus _VI_FUNC  viAssertUtilSignal(ViSession vi, ViUInt16 line);
 
-// viAssertIntrSignal
+// ViAssertIntrSignal Asserts the specified interrupt or signal.
 // ViStatus _VI_FUNC  viAssertIntrSignal(ViSession vi, ViInt16 mode, ViUInt32 statusID);
 
-// viMapTrigger
+// ViMapTrigger Map the specified trigger source line to the specified
+// destination line.
 // ViStatus _VI_FUNC  viMapTrigger    (ViSession vi, ViInt16 trigSrc, ViInt16 trigDest,
 //                                     ViUInt16 mode);
 
-// viUnmapTrigger
+// ViUnmapTrigger Undo a previous map from the specified trigger source
+// line to the specified destination line.
 // ViStatus _VI_FUNC  viUnmapTrigger  (ViSession vi, ViInt16 trigSrc, ViInt16 trigDest);
 
-// viUsbControlOut
+// ViUsbControlOut Performs a USB control pipe transfer to the device.
 // ViStatus _VI_FUNC  viUsbControlOut (ViSession vi, ViInt16 bmRequestType, ViInt16 bRequest,
 //                                     ViUInt16 wValue, ViUInt16 wIndex, ViUInt16 wLength,
 //                                     ViBuf buf);
 
-// viUsbControlIn
+// ViUsbControlIn Performs a USB control pipe transfer from the device.
 // ViStatus _VI_FUNC  viUsbControlIn  (ViSession vi, ViInt16 bmRequestType, ViInt16 bRequest,
 //                                     ViUInt16 wValue, ViUInt16 wIndex, ViUInt16 wLength,
 //                                     ViPBuf buf, ViPUInt16 retCnt);
-
-// viPxiReserveTriggers
-// ViStatus _VI_FUNC  viPxiReserveTriggers(ViSession vi, ViInt16 cnt, ViAInt16 trigBuses,
-//                                     ViAInt16 trigLines, ViPInt16 failureIndex);
 
 // ViVersion Returns the unformatted resource version number.
 func ViVersion() (vers uint32) {
@@ -661,6 +698,10 @@ func ViVersSubMinor() (versSubMin uint32) {
 	versSubMin = (ViVersion() & 0x000000FF)
 	return versSubMin
 }
+
+// ViPxiReserveTriggers
+// ViStatus _VI_FUNC  viPxiReserveTriggers(ViSession vi, ViInt16 cnt, ViAInt16 trigBuses,
+//                                     ViAInt16 trigLines, ViPInt16 failureIndex);
 
 // viVxiServantResponse
 // ViStatus _VI_FUNC viVxiServantResponse(ViSession vi, ViInt16 mode, ViUInt32 resp);
