@@ -373,8 +373,17 @@ func (instr Object) ViFlush(mask uint16) (status ViStatus) {
 	return status
 }
 
-// ViBufWrite
+// ViBufWrite Writes data to a formatted I/O write buffer synchronously.
 // ViStatus _VI_FUNC  viBufWrite      (ViSession vi, ViBuf  buf, ViUInt32 cnt, ViPUInt32 retCnt);
+func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
+	status ViStatus) {
+
+	status = ViStatus(C.viBufWrite((C.ViSession)(instr),
+		(C.ViBuf)(unsafe.Pointer(&buf[0])),
+		(C.ViUInt32)(cnt),
+		(*C.ViUInt32)(unsafe.Pointer(&retCnt))))
+	return retCnt, status
+}
 
 // ViBufRead
 // ViStatus _VI_FUNC  viBufRead       (ViSession vi, ViPBuf buf, ViUInt32 cnt, ViPUInt32 retCnt);
