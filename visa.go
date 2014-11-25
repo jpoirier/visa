@@ -2,32 +2,25 @@
 // Distributable under the terms of The simplified BSD License
 // that can be found in the LICENSE file.
 
-// Package visa wraps National Instruments
-//  (VISA) driver. The driver allows a client application to communicate
-// with a VISA enabled piece of test equipment remotely and/or programmatically.
-// VISA is an industry standard for GPIB communications.
+// Package visa wraps National Instruments VISA (Virtual Instrument Software
+// Architecture) driver. The driver allows a client application to communicate
+// with most instrumentation buses including GPIB, USB, Serial, and Ethernet.
+// VISA is an industry standard for instrument communications.
 //
-// The package is low level and, for the most part, is one-to-one with the
-// exported C functions it wraps. Clients would typically build instrument
-// drivers around the package but it can also be used directly.
+// The package is one-to-one with the exported C functions it wraps. Clients
+// would typically build instrument drivers around the package but it can also
+// be used directly.
 //
-// Lots of miscellaneous NI-488.2 information:
-//     http://sine.ni.com/psp/app/doc/p/id/psp-356
+// NI-VISA Drivers:
+//     http://www.ni.com/downloads/ni-drivers/
 //
-// GPIB Driver Versions for Microsoft Windows and DOS:
-//     http://zone.ni.com/devzone/cda/tut/p/id/5326#toc0
-//
-// GPIB Driver Versions for non-Microsoft Operating Systems:
-//     http://zone.ni.com/devzone/cda/tut/p/id/5458
-//
-// Direct download: http://download.ni.com/support/softlib/gpib/
+// NI-VISA Overview:
+//     http://www.ni.com/white-paper/3702/en/
 
 // export CGO_ENABLED=1
 // export GOARCH=386
 
 package visa
-
-import "unsafe"
 
 /*
 #cgo linux CFLAGS: -I.
@@ -40,28 +33,29 @@ import "unsafe"
 #include <visa.h>
 */
 import "C"
+import "unsafe"
 
 var PackageVersion string = "v0.1"
 
 // VISA Types
 
-type ViEvent uint32
+// type ViEvent uint32
 
 // type ViPEvent C.ViPEvent
 
-type ViFindList uint32
+// type ViFindList uint32
 
 // type ViPFindList C.ViPFindList
 
-type ViBusAddress uint32
+// type ViBusAddress uint32
 
 // type ViBusAddress uint64
 
-type ViBusSize uint32
+// type ViBusSize uint32
 
 // type ViBusSize uint64
 
-type ViAttrState uint32
+// type ViAttrState uint32
 
 // type ViAttrState uint64
 
@@ -70,36 +64,37 @@ type ViAttrState uint32
 // typedef ViBusAddress64 _VI_PTR ViPBusAddress64;
 // #endif
 
-type ViEventType uint32
+// type ViEventType uint32
 
 // type ViPEventType C.ViPEventType
 
-type ViAEventType C.ViAEventType
-type ViPAttrState C.ViPAttrState
-type ViPAttr C.ViPAttr
-type ViAAttr C.ViAAttr
-type ViKeyId C.ViKeyId
-type ViPKeyId C.ViPKeyId
-type ViJobId C.ViJobId
-type ViPJobId C.ViPJobId
+// type ViAEventType C.ViAEventType
+// type ViPAttrState C.ViPAttrState
+// type ViPAttr C.ViPAttr
+// type ViAAttr C.ViAAttr
+// type ViKeyId C.ViKeyId
+// type ViPKeyId C.ViPKeyId
+// type ViJobId C.ViJobId
+// type ViPJobId C.ViPJobId
 
-type ViAccessMode uint32
-type ViPAccessMode C.ViPAccessMode
-type ViPBusAddress C.ViPBusAddress
-type ViEventFilter uint32
+// type ViAccessMode uint32
+// type ViPAccessMode C.ViPAccessMode
+// type ViPBusAddress C.ViPBusAddress
+// type ViEventFilter uint32
 
-type ViVAList C.ViVAList
-type ViStatus C.ViStatus
+// type ViVAList C.ViVAList
 
 // type ViPSession C.ViPSession
-type ViSession uint32
-type ViString string
+// type ViSession uint32
+// type ViString string
 
 // type ViPUInt32 C.ViPUInt32
-type ViChar int8
-type ViRsrc string
-type ViPUInt16 C.ViPUInt16
-type ViUInt32 uint32
+// type ViChar int8
+// type ViRsrc string
+// type ViPUInt16 C.ViPUInt16
+// type ViUInt32 uint32
+
+type ViStatus C.ViStatus
 
 // Resource Manager Functions and Operations
 
@@ -122,7 +117,6 @@ func ViFindRsrc(sesn uint32, expr string) (vi uint32, retCnt uint32,
 		(*C.ViFindList)(unsafe.Pointer(&vi)),
 		(*C.ViUInt32)(unsafe.Pointer(&retCnt)),
 		(*C.ViChar)(unsafe.Pointer(&d[0]))))
-
 	return vi, retCnt, string(d), status
 }
 
@@ -132,7 +126,6 @@ func ViFindNext(vi uint32) (desc string, status ViStatus) {
 	cdesc := (*C.ViChar)(C.CString(desc))
 	defer C.free(unsafe.Pointer(cdesc))
 	status = ViStatus(C.viFindNext((C.ViFindList)(vi), cdesc))
-
 	return desc, status
 }
 
@@ -146,7 +139,6 @@ func ViParseRsrc(rmSesn uint32, rsrcName string) (intfType uint16,
 		crsrcName,
 		(*C.ViUInt16)(unsafe.Pointer(&intfType)),
 		(*C.ViUInt16)(unsafe.Pointer(&intfNum))))
-
 	return intfType, intfNum, status
 }
 
@@ -174,7 +166,6 @@ func ViParseRsrcEx(rmSesn uint32, rsrcName string) (intfType uint16,
 		crsrcClass,
 		cexpandedUnaliasedName,
 		caliasIfExists))
-
 	return intfType, intfNum, rsrcClass, expandedUnaliasedName, aliasIfExists, status
 }
 
@@ -189,7 +180,6 @@ func ViOpen(sesn uint32, name string, mode, timeout uint32) (vi uint32,
 		(C.ViAccessMode)(mode),
 		(C.ViUInt32)(timeout),
 		(*C.ViSession)(unsafe.Pointer(&vi))))
-
 	return vi, status
 }
 
@@ -207,7 +197,6 @@ func ViSetAttribute(vi, attribute, attrState uint32) (status ViStatus) {
 	status = ViStatus(C.viSetAttribute((C.ViObject)(vi),
 		(C.ViAttr)(attribute),
 		(C.ViAttrState)(attrState)))
-
 	return status
 }
 
@@ -238,7 +227,6 @@ func ViTerminate(vi uint32, degree, jobId uint16) (status ViStatus) {
 	status = ViStatus(C.viTerminate((C.ViObject)(vi),
 		(C.ViUInt16)(degree),
 		(C.ViJobId)(jobId)))
-
 	return status
 }
 
@@ -262,24 +250,23 @@ func ViLock(vi, lockType, timeout uint32, requestedKey string) (accessKey string
 		(C.ViUInt32)(timeout),
 		crequestedKey,
 		(*C.ViChar)(unsafe.Pointer(&a[0]))))
-
 	return string(a), status
 }
 
 // ViUnlock Relinquishes a lock for the specified resource.
 func ViUnlock(vi uint32) (status ViStatus) {
 	status = ViStatus(C.viUnlock((C.ViSession)(vi)))
-
 	return status
 }
 
 // ViEnableEvent Enables notification of a specified event.
-func ViEnableEvent(vi, eventType uint32, mechanism uint16, context uint32) (status ViStatus) {
+func ViEnableEvent(vi, eventType uint32, mechanism uint16,
+	context uint32) (status ViStatus) {
+
 	status = ViStatus(C.viEnableEvent((C.ViSession)(vi),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism),
 		(C.ViEventFilter)(context)))
-
 	return status
 }
 
@@ -288,9 +275,11 @@ func ViEnableEvent(vi, eventType uint32, mechanism uint16, context uint32) (stat
 // inEventType in
 // mechanism in
 // ViStatus _VI_FUNC  viDisableEvent  (ViSession vi, ViEventType eventType, ViUInt16 mechanism);
-func ViDisableEvent(vi uint32) {
-	cvi := (C.ViSession)(vi)
-	return
+func ViDisableEvent(vi, eventType uint32, mechanism uint16) (status ViStatus) {
+	status = ViStatus(C.viDisableEvent((C.ViSession)(vi),
+		(C.ViEventType)(eventType),
+		(C.ViUInt16)(mechanism)))
+	return status
 }
 
 // ViDiscardEvents Discards event occurrences for specified event types and mechanisms in a session.
@@ -298,22 +287,28 @@ func ViDisableEvent(vi uint32) {
 // inEventType in
 // mechanism in
 // ViStatus _VI_FUNC  viDiscardEvents (ViSession vi, ViEventType eventType, ViUInt16 mechanism);
-func ViDiscardEvents(vi uint32) {
-	cvi := (C.ViSession)(vi)
-	return
+func ViDiscardEvents(vi, eventType uint32, mechanism uint16) (status ViStatus) {
+	status = ViStatus(C.viDiscardEvents((C.ViSession)(vi),
+		(C.ViEventType)(eventType),
+		(C.ViUInt16)(mechanism)))
+	return status
 }
 
 // ViWaitOnEvent Waits for an occurrence of the specified event for a given session.
-// vin in
+// vi in
 // inEventType in
 // timeout in
 // outEventType out
 // outContext out
 // ViStatus _VI_FUNC  viWaitOnEvent   (ViSession vi, ViEventType inEventType, ViUInt32 timeout,
 //                                     ViPEventType outEventType, ViPEvent outContext);
-func ViWaitOnEvent(vi uint32) {
-	cvi := (C.ViSession)(vi)
-	return
+func ViWaitOnEvent(vi, inEventType, timeout uint32) (outEventType, outContext uint32, status ViStatus) {
+	status = ViStatus(C.viWaitOnEvent((C.ViSession)(vi),
+		(C.ViEventType)(inEventType),
+		(C.ViUInt32)(timeout),
+		(C.ViPEventType)(unsafe.Pointer(&outEventType)),
+		(C.ViPEvent)(unsafe.Pointer(&outContext))))
+	return outEventType, outContext, status
 }
 
 // ViInstallHandler nstalls handlers for event callbacks.
@@ -323,10 +318,10 @@ func ViWaitOnEvent(vi uint32) {
 // userHandle in
 // ViStatus _VI_FUNC  viInstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
 //                                     ViAddr userHandle);
-func ViInstallHandler(vi uint32) {
-	cvi := (C.ViSession)(vi)
-	return
-}
+// func ViInstallHandler(vi, eventType uint32) {
+// 	cvi := (C.ViSession)(vi)
+// 	return
+// }
 
 // ViUninstallHandler Uninstalls handlers for events.
 // vi in
@@ -335,10 +330,10 @@ func ViInstallHandler(vi uint32) {
 // userHandle in
 // ViStatus _VI_FUNC  viUninstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
 //                                       ViAddr userHandle);
-func ViUninstallHandler(vi uint32) {
-	cvi := (C.ViSession)(vi)
-	return
-}
+// func ViUninstallHandler(vi uint32) {
+// 	cvi := (C.ViSession)(vi)
+// 	return
+// }
 
 // Basic I/O Operations
 
