@@ -602,9 +602,6 @@ func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress,
 
 // ViMapAddress Maps the specified memory space into the process’s
 // address space.
-// ViStatus _VI_FUNC  viMapAddress    (ViSession vi, ViUInt16 mapSpace, ViBusAddress mapOffset,
-//                                     ViBusSize mapSize, ViBoolean access,
-//                                     ViAddr suggested, ViPAddr address);
 func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress,
 	mapSize ViBusSize, access uint16, suggested *byte) (address *byte,
 	status ViStatus) {
@@ -620,7 +617,6 @@ func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress,
 }
 
 // ViUnmapAddress Unmaps memory space previously mapped by ViMapAddress().
-// ViStatus _VI_FUNC  viUnmapAddress  (ViSession vi);
 func (instr Object) ViUnmapAddress() ViStatus {
 	status := ViStatus(C.viUnmapAddress((C.ViSession)(instr)))
 	return status
