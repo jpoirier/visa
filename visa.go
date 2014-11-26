@@ -50,17 +50,15 @@ type ViAttrState C.ViAttrState
 
 // ViOpenDefaultRM returns a session to the Default Resource Manager resource.
 func ViOpenDefaultRM() (rm Session, status ViStatus) {
-	status = ViStatus(C.viOpenDefaultRM((C.ViPSession)(unsafe.Pointer(&rm))))
+	status = ViStatus(C.viOpenDefaultRM((*C.ViSession)(unsafe.Pointer(&rm))))
 	return rm, status
 }
 
-var viGetDefaultRM = ViOpenDefaultRM
+var ViGetDefaultRM = ViOpenDefaultRM
 
 // ViFindRsrc queries a VISA system to locate the resources associated with a
 // specified interface.
-func (rm Session) ViFindRsrc(expr string) (findList, retCnt uint32,
-	desc string, status ViStatus) {
-
+func (rm Session) ViFindRsrc(expr string) (findList, retCnt uint32, desc string, status ViStatus) {
 	cexpr := (*C.ViChar)(C.CString(expr))
 	defer C.free(unsafe.Pointer(cexpr))
 	d := make([]byte, 257)
@@ -74,17 +72,15 @@ func (rm Session) ViFindRsrc(expr string) (findList, retCnt uint32,
 
 // ViFindNext gets the next resource from the list of resources found during a
 // previous call to viFindRsrc.
-func ViFindNext(findList uint32) (desc string, status ViStatus) {
+func ViFindNext(findList uint32) (string, ViStatus) {
 	d := make([]byte, 257)
-	status = ViStatus(C.viFindNext((C.ViFindList)(findList),
+	status := ViStatus(C.viFindNext((C.ViFindList)(findList),
 		(*C.ViChar)(unsafe.Pointer(&d[0]))))
 	return string(d), status
 }
 
 // ViParseRsrc parses a resource string to get the interface information.
-func (rm Session) ViParseRsrc(rsrcName string) (intfType, intfNum uint16,
-	status ViStatus) {
-
+func (rm Session) ViParseRsrc(rsrcName string) (intfType, intfNum uint16, status ViStatus) {
 	crsrcName := (*C.ViChar)(C.CString(rsrcName))
 	defer C.free(unsafe.Pointer(crsrcName))
 	status = ViStatus(C.viParseRsrc(C.ViSession(rm),
@@ -96,8 +92,7 @@ func (rm Session) ViParseRsrc(rsrcName string) (intfType, intfNum uint16,
 
 // ViParseRsrcEx parses a resource string to get extended interface information.
 func (rm Session) ViParseRsrcEx(rsrcName string) (intfType, intfNum uint16,
-	rsrcClass, expandedUnaliasedName, aliasIfExists string,
-	status ViStatus) {
+	rsrcClass, expandedUnaliasedName, aliasIfExists string, status ViStatus) {
 
 	crsrcName := (*C.ViChar)(C.CString(rsrcName))
 	defer C.free(unsafe.Pointer(crsrcName))
@@ -115,9 +110,7 @@ func (rm Session) ViParseRsrcEx(rsrcName string) (intfType, intfNum uint16,
 }
 
 // ViOpen opens a session to the specified resource.
-func (rm Session) ViOpen(name string, mode, timeout uint32) (instr Object,
-	status ViStatus) {
-
+func (rm Session) ViOpen(name string, mode, timeout uint32) (instr Object, status ViStatus) {
 	cname := (*C.ViChar)(C.CString(name))
 	defer C.free(unsafe.Pointer(cname))
 	status = ViStatus(C.viOpen(C.ViSession(rm),
@@ -131,22 +124,19 @@ func (rm Session) ViOpen(name string, mode, timeout uint32) (instr Object,
 // Resource Template Operations
 
 // ViClose Closes the specified session, event, or find list.
-func (rm Session) ViClose() (status ViStatus) {
-	status = ViStatus(C.viClose((C.ViObject)(rm)))
-	return status
+func (rm Session) ViClose() ViStatus {
+	return ViStatus(C.viClose((C.ViObject)(rm)))
 }
 
 func (instr Object) ViClose() ViStatus {
-	status := ViStatus(C.viClose((C.ViObject)(instr)))
-	return status
+	return ViStatus(C.viClose((C.ViObject)(instr)))
 }
 
 // ViSetAttribute Sets the state of an attribute.
 func (instr Object) ViSetAttribute(attribute, attrState uint32) ViStatus {
-	status := ViStatus(C.viSetAttribute((C.ViObject)(instr),
+	return ViStatus(C.viSetAttribute((C.ViObject)(instr),
 		(C.ViAttr)(attribute),
 		(C.ViAttrState)(attrState)))
-	return status
 }
 
 // ViGetAttribute Retrieves the state of an attribute.
@@ -163,29 +153,25 @@ func (instr Object) ViSetAttribute(attribute, attrState uint32) ViStatus {
 
 // ViStatusDesc Returns a user-readable description of the status code
 // passed to the operation.
-func (instr Object) ViStatusDesc(status ViStatus) string {
+func (instr Object) ViStatusDesc(status_in ViStatus) (string, ViStatus) {
 	d := make([]byte, 257)
-	status = ViStatus(C.viStatusDesc((C.ViObject)(instr),
-		(C.ViStatus)(status),
+	status := ViStatus(C.viStatusDesc((C.ViObject)(instr),
+		(C.ViStatus)(status_in),
 		(*C.ViChar)(unsafe.Pointer(&d[0]))))
-	return string(d)
+	return string(d), status
 }
 
 // ViTerminate Requests a VISA session to terminate normal execution of an operation.
 func (instr Object) ViTerminate(degree, jobId uint16) ViStatus {
-	status := ViStatus(C.viTerminate((C.ViObject)(instr),
+	return ViStatus(C.viTerminate((C.ViObject)(instr),
 		(C.ViUInt16)(degree),
 		(C.ViJobId)(jobId)))
-	return status
 }
 
 // ViLock Establishes an access mode to the specified resource.
-func (instr Object) ViLock(lockType, timeout uint32, requestedKey string) (string,
-	ViStatus) {
-
+func (instr Object) ViLock(lockType, timeout uint32, requestedKey string) (string, ViStatus) {
 	crequestedKey := (*C.ViChar)(C.CString(requestedKey))
 	defer C.free(unsafe.Pointer(crequestedKey))
-
 	a := make([]byte, 257)
 	status := ViStatus(C.viLock((C.ViSession)(instr),
 		(C.ViAccessMode)(lockType),
@@ -197,37 +183,32 @@ func (instr Object) ViLock(lockType, timeout uint32, requestedKey string) (strin
 
 // ViUnlock Relinquishes a lock for the specified resource.
 func (instr Object) ViUnlock() ViStatus {
-	status := ViStatus(C.viUnlock((C.ViSession)(instr)))
-	return status
+	return ViStatus(C.viUnlock((C.ViSession)(instr)))
 }
 
 // ViEnableEvent Enables notification of a specified event.
-func (instr Object) ViEnableEvent(eventType uint32, mechanism uint16,
-	context uint32) ViStatus {
+func (instr Object) ViEnableEvent(eventType uint32, mechanism uint16, context uint32) ViStatus {
 
-	status := ViStatus(C.viEnableEvent((C.ViSession)(instr),
+	return ViStatus(C.viEnableEvent((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism),
 		(C.ViEventFilter)(context)))
-	return status
 }
 
 // ViDisableEvent Disables notification of the specified event type(s)
 // via the specified mechanism(s).
 func (instr Object) ViDisableEvent(eventType uint32, mechanism uint16) ViStatus {
-	status := ViStatus(C.viDisableEvent((C.ViSession)(instr),
+	return ViStatus(C.viDisableEvent((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism)))
-	return status
 }
 
 // ViDiscardEvents Discards event occurrences for specified event types
 // and mechanisms in a session.
 func (instr Object) ViDiscardEvents(eventType uint32, mechanism uint16) ViStatus {
-	status := ViStatus(C.viDiscardEvents((C.ViSession)(instr),
+	return ViStatus(C.viDiscardEvents((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism)))
-	return status
 }
 
 // ViWaitOnEvent Waits for an occurrence of the specified event for a given session.
@@ -269,34 +250,28 @@ func (instr Object) ViWaitOnEvent(inEventType, timeout uint32) (outEventType,
 // Basic I/O Operations
 
 // ViRead Reads data from device or interface synchronously.
-func (instr Object) ViRead(cnt uint32) (buf []byte, retCnt uint32,
-	status ViStatus) {
-
-	b := make([]byte, cnt)
+func (instr Object) ViRead(cnt uint32) (buf []byte, retCnt uint32, status ViStatus) {
+	buf = make([]byte, cnt)
 	status = ViStatus(C.viRead((C.ViSession)(instr),
-		(*C.ViByte)(unsafe.Pointer(&b[0])),
+		(*C.ViByte)(unsafe.Pointer(&buf[0])),
 		(C.ViUInt32)(cnt),
 		(*C.ViUInt32)(unsafe.Pointer(&retCnt))))
-	return b, retCnt, status
+	return buf, retCnt, status
 }
 
 // ViReadAsync Reads data from device or interface asynchronously.
-func (instr Object) ViReadAsync(cnt uint32) (buf []byte, jobId uint32,
-	status ViStatus) {
-
-	b := make([]byte, cnt)
+func (instr Object) ViReadAsync(cnt uint32) (buf []byte, jobId uint32, status ViStatus) {
+	buf = make([]byte, cnt)
 	status = ViStatus(C.viReadAsync((C.ViSession)(instr),
-		(*C.ViByte)(unsafe.Pointer(&b[0])),
+		(*C.ViByte)(unsafe.Pointer(&buf[0])),
 		(C.ViUInt32)(cnt),
 		(*C.ViJobId)(unsafe.Pointer(&jobId))))
-	return b, jobId, status
+	return buf, jobId, status
 }
 
 // ViReadToFile Reads data synchronously and stores the transferred
 // data in a file.
-func (instr Object) ViReadToFile(filename string, cnt uint32) (retCnt uint32,
-	status ViStatus) {
-
+func (instr Object) ViReadToFile(filename string, cnt uint32) (retCnt uint32, status ViStatus) {
 	cfilename := (*C.ViChar)(C.CString(filename))
 	defer C.free(unsafe.Pointer(cfilename))
 	status = ViStatus(C.viReadToFile((C.ViSession)(instr),
@@ -307,9 +282,7 @@ func (instr Object) ViReadToFile(filename string, cnt uint32) (retCnt uint32,
 }
 
 // ViWrite Writes data to a device or interface synchronously.
-func (instr Object) ViWrite(buf []byte, cnt uint32) (retCnt uint32,
-	status ViStatus) {
-
+func (instr Object) ViWrite(buf []byte, cnt uint32) (retCnt uint32, status ViStatus) {
 	status = ViStatus(C.viWrite((C.ViSession)(instr),
 		(C.ViBuf)(unsafe.Pointer(&buf[0])),
 		(C.ViUInt32)(cnt),
@@ -318,9 +291,7 @@ func (instr Object) ViWrite(buf []byte, cnt uint32) (retCnt uint32,
 }
 
 // ViWriteAsync Writes data to a device or interface asynchronously.
-func (instr Object) ViWriteAsync(buf []byte, cnt uint32) (jobId uint32,
-	status ViStatus) {
-
+func (instr Object) ViWriteAsync(buf []byte, cnt uint32) (jobId uint32, status ViStatus) {
 	status = ViStatus(C.viWriteAsync((C.ViSession)(instr),
 		(C.ViBuf)(unsafe.Pointer(&buf[0])),
 		(C.ViUInt32)(cnt),
@@ -329,9 +300,7 @@ func (instr Object) ViWriteAsync(buf []byte, cnt uint32) (jobId uint32,
 }
 
 // ViWriteFromFile Take data from a file and write it out synchronously.
-func (instr Object) ViWriteFromFile(filename string, cnt uint32) (retCnt uint32,
-	status ViStatus) {
-
+func (instr Object) ViWriteFromFile(filename string, cnt uint32) (retCnt uint32, status ViStatus) {
 	cfilename := (*C.ViChar)(C.CString(filename))
 	defer C.free(unsafe.Pointer(cfilename))
 	status = ViStatus(C.viWriteFromFile((C.ViSession)(instr),
@@ -343,9 +312,8 @@ func (instr Object) ViWriteFromFile(filename string, cnt uint32) (retCnt uint32,
 
 // ViAssertTrigger Asserts software or hardware trigger.
 func (instr Object) ViAssertTrigger(protocol uint16) ViStatus {
-	status := ViStatus(C.viAssertTrigger((C.ViSession)(instr),
+	return ViStatus(C.viAssertTrigger((C.ViSession)(instr),
 		(C.ViUInt16)(protocol)))
-	return status
 }
 
 // ViReadSTB Reads a status byte of the service request.
@@ -357,8 +325,7 @@ func (instr Object) ViReadSTB() (stb_stat uint16, status ViStatus) {
 
 // ViClear Clears a device.
 func (instr Object) ViClear() ViStatus {
-	status := ViStatus(C.viClear((C.ViSession)(instr)))
-	return status
+	return ViStatus(C.viClear((C.ViSession)(instr)))
 }
 
 // Formatted and Buffered I/O Operations
@@ -366,24 +333,20 @@ func (instr Object) ViClear() ViStatus {
 // ViSetBuf Sets the size for the formatted I/O and/or low-level
 // I/O communication buffer(s).
 func (instr Object) ViSetBuf(mask uint16, size uint32) ViStatus {
-	status := ViStatus(C.viSetBuf((C.ViSession)(instr),
+	return ViStatus(C.viSetBuf((C.ViSession)(instr),
 		(C.ViUInt16)(mask),
 		(C.ViUInt32)(size)))
-	return status
 }
 
 // ViFlush Manually flushes the specified buffers associated with
 // formatted I/O operations and/or serial communication.
 func (instr Object) ViFlush(mask uint16) ViStatus {
-	status := ViStatus(C.viFlush((C.ViSession)(instr),
+	return ViStatus(C.viFlush((C.ViSession)(instr),
 		(C.ViUInt16)(mask)))
-	return status
 }
 
 // ViBufWrite Writes data to a formatted I/O write buffer synchronously.
-func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
-	status ViStatus) {
-
+func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32, status ViStatus) {
 	status = ViStatus(C.viBufWrite((C.ViSession)(instr),
 		(C.ViBuf)(unsafe.Pointer(&buf[0])),
 		(C.ViUInt32)(cnt),
@@ -393,15 +356,13 @@ func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32,
 
 // ViBufRead Reads data from a device or interface through the use of
 // a formatted I/O read buffer.
-func (instr Object) ViBufRead(cnt uint32) (buf []byte, retCnt uint32,
-	status ViStatus) {
-
-	b := make([]byte, cnt)
+func (instr Object) ViBufRead(cnt uint32) (buf []byte, retCnt uint32, status ViStatus) {
+	buf = make([]byte, cnt)
 	status = ViStatus(C.viBufRead((C.ViSession)(instr),
-		(C.ViBuf)(unsafe.Pointer(&b[0])),
+		(C.ViBuf)(unsafe.Pointer(&buf[0])),
 		(C.ViUInt32)(cnt),
 		(*C.ViUInt32)(unsafe.Pointer(&retCnt))))
-	return b, retCnt, status
+	return buf, retCnt, status
 }
 
 // ViPrintf Converts, formats, and sends the parameters (designated by ...)
@@ -561,7 +522,7 @@ func (instr Object) ViMove(srcSpace uint16, srcOffset ViBusAddress, srcWidth uin
 	destSpace uint16, destOffset ViBusAddress, destWidth uint16,
 	srcLength ViBusSize) ViStatus {
 
-	status := ViStatus(C.viMove((C.ViSession)(instr),
+	return ViStatus(C.viMove((C.ViSession)(instr),
 		(C.ViUInt16)(srcSpace),
 		(C.ViBusAddress)(srcOffset),
 		(C.ViUInt16)(srcWidth),
@@ -569,12 +530,11 @@ func (instr Object) ViMove(srcSpace uint16, srcOffset ViBusAddress, srcWidth uin
 		(C.ViBusAddress)(destOffset),
 		(C.ViUInt16)(destWidth),
 		(C.ViBusSize)(srcLength)))
-	return status
 }
 
 // ViMoveAsync Moves a block of data asynchronously.
-func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress,
-	srcWidth, destSpace uint16, destOffset ViBusAddress, destWidth uint16,
+func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress, srcWidth,
+	destSpace uint16, destOffset ViBusAddress, destWidth uint16,
 	srcLength ViBusSize) (jobId uint32, status ViStatus) {
 
 	status = ViStatus(C.viMoveAsync((C.ViSession)(instr),
@@ -602,9 +562,8 @@ func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress,
 
 // ViMapAddress Maps the specified memory space into the process’s
 // address space.
-func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress,
-	mapSize ViBusSize, access uint16, suggested *byte) (address *byte,
-	status ViStatus) {
+func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress, mapSize ViBusSize,
+	access uint16, suggested *byte) (address *byte, status ViStatus) {
 
 	status = ViStatus(C.viMapAddress((C.ViSession)(instr),
 		(C.ViUInt16)(mapSpace),
@@ -618,8 +577,7 @@ func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress,
 
 // ViUnmapAddress Unmaps memory space previously mapped by ViMapAddress().
 func (instr Object) ViUnmapAddress() ViStatus {
-	status := ViStatus(C.viUnmapAddress((C.ViSession)(instr)))
-	return status
+	return ViStatus(C.viUnmapAddress((C.ViSession)(instr)))
 }
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
@@ -719,27 +677,23 @@ func (instr Object) ViUnmapAddress() ViStatus {
 //                                     ViPBuf buf, ViPUInt16 retCnt);
 
 // ViVersion Returns the unformatted resource version number.
-func ViVersion() (vers uint32) {
-	vers = uint32(C.VI_SPEC_VERSION)
-	return vers
+func ViVersion() uint32 {
+	return uint32(C.VI_SPEC_VERSION)
 }
 
 // ViVersMajor Returns the major resource version number.
-func ViVersMajor() (versMaj uint32) {
-	versMaj = (ViVersion() & 0xFFF00000) >> 20
-	return versMaj
+func ViVersMajor() uint32 {
+	return uint32((ViVersion() & 0xFFF00000) >> 20)
 }
 
 // ViVersMinor Returns the minor resource version number.
-func ViVersMinor() (versMin uint32) {
-	versMin = (ViVersion() & 0x000FFF00) >> 8
-	return versMin
+func ViVersMinor() uint32 {
+	return uint32((ViVersion() & 0x000FFF00) >> 8)
 }
 
 // ViVersSubMinor Returns the sub-minor resource version number.
-func ViVersSubMinor() (versSubMin uint32) {
-	versSubMin = (ViVersion() & 0x000000FF)
-	return versSubMin
+func ViVersSubMinor() uint32 {
+	return uint32((ViVersion() & 0x000000FF))
 }
 
 // ViPxiReserveTriggers
