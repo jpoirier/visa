@@ -7,6 +7,10 @@
 // with most instrumentation buses including GPIB, USB, Serial, and Ethernet.
 // VISA is an industry standard for instrument communications.
 //
+// The package is low level and, for the most part, is one-to-one with the
+// exported C functions it wraps. Clients would typically build instrument
+// drivers around the package but it can also be used directly.
+//
 // NI-VISA Drivers:
 //     http://www.ni.com/downloads/ni-drivers/
 //
@@ -28,11 +32,10 @@ package visa
 #include <stdlib.h>
 #include <visa.h>
 
-#if defined(_VI_INT64_UINT64_DEFINED) && defined(_VISA_ENV_IS_64_BIT)
-
-#else
-
-#endif
+extern void go_cb(ViSession, ViEventType, ViEvent, ViAddr);
+ViHndlr get_go_cb() {
+	return (ViHndlr)go_cb;
+}
 */
 import "C"
 import "unsafe"
@@ -46,6 +49,11 @@ type ViBusAddress C.ViBusAddress
 type ViBusSize C.ViBusSize
 type ViAttrState C.ViAttrState
 
+type UserCallback func(instr Object, etype, eventContext uint32)
+type PUserCallback *UserCallback
+
+// typedef ViStatus (_VI_FUNCH _VI_PTR ViHndlr)
+//    (ViSession vi, ViEventType eventType, ViEvent event, ViAddr userHandle);
 // Resource Manager Functions and Operations
 
 // ViOpenDefaultRM returns a session to the Default Resource Manager resource.
@@ -230,10 +238,12 @@ func (instr Object) ViWaitOnEvent(inEventType, timeout uint32) (outEventType,
 // userHandle in
 // ViStatus _VI_FUNC  viInstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
 //                                     ViAddr userHandle);
-// func (instr Object) ViInstallHandler(vi, eventType uint32) {
-// 	cvi := (C.ViSession)(vi)
-// 	return
-// }
+func (instr Object) ViInstallHandler(eventType uint32, userHandle UserCallback) ViStatus {
+	return ViStatus(C.viInstallHandler((C.ViSession)(instr),
+		(C.ViEventType)(eventType),
+		(C.ViHndlr)(C.get_go_cb()),
+		(C.ViAddr)(unsafe.Pointer(&userHandle))))
+}
 
 // ViUninstallHandler Uninstalls handlers for events.
 // vi in
