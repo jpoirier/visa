@@ -52,8 +52,6 @@ type ViAttrState C.ViAttrState
 type UserCallback func(instr Object, etype, eventContext uint32)
 type PUserCallback *UserCallback
 
-// typedef ViStatus (_VI_FUNCH _VI_PTR ViHndlr)
-//    (ViSession vi, ViEventType eventType, ViEvent event, ViAddr userHandle);
 // Resource Manager Functions and Operations
 
 // ViOpenDefaultRM returns a session to the Default Resource Manager resource.
@@ -148,16 +146,12 @@ func (instr Object) ViSetAttribute(attribute, attrState uint32) ViStatus {
 }
 
 // ViGetAttribute Retrieves the state of an attribute.
-// vi in
-// attrName in
-// attrValue out
-// ViStatus _VI_FUNC  viGetAttribute  (ViObject vi, ViAttr attrName, void _VI_PTR attrValue);
-// func (instr Object) ViGetAttribute(attribute uint32) {
-// 	cvi := (C.ViObject)(vi)
-// 	cattribute := (C.ViAttr)(attribute)
-
-// 	return
-// }
+//
+func (instr Object) ViGetAttribute(attrName uint32, attrValue unsafe.Pointer) ViStatus {
+	return ViStatus(C.viGetAttribute((C.ViObject)(instr),
+		(C.ViAttr)(attrName),
+		attrValue))
+}
 
 // ViStatusDesc Returns a user-readable description of the status code
 // passed to the operation.
@@ -226,18 +220,12 @@ func (instr Object) ViWaitOnEvent(inEventType, timeout uint32) (outEventType,
 	status = ViStatus(C.viWaitOnEvent((C.ViSession)(instr),
 		(C.ViEventType)(inEventType),
 		(C.ViUInt32)(timeout),
-		(C.ViPEventType)(unsafe.Pointer(&outEventType)),
-		(C.ViPEvent)(unsafe.Pointer(&outContext))))
+		(*C.ViEventType)(unsafe.Pointer(&outEventType)),
+		(*C.ViEvent)(unsafe.Pointer(&outContext))))
 	return outEventType, outContext, status
 }
 
 // ViInstallHandler Installs handlers for event callbacks.
-// vi in
-// eventType in
-// handler in
-// userHandle in
-// ViStatus _VI_FUNC  viInstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
-//                                     ViAddr userHandle);
 func (instr Object) ViInstallHandler(eventType uint32, userHandle UserCallback) ViStatus {
 	return ViStatus(C.viInstallHandler((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
@@ -246,16 +234,13 @@ func (instr Object) ViInstallHandler(eventType uint32, userHandle UserCallback) 
 }
 
 // ViUninstallHandler Uninstalls handlers for events.
-// vi in
-// eventType in
-// handler in
-// userHandle in
-// ViStatus _VI_FUNC  viUninstallHandler(ViSession vi, ViEventType eventType, ViHndlr handler,
-//                                       ViAddr userHandle);
-// func (instr Object) ViUninstallHandler(vi uint32) {
-// 	cvi := (C.ViSession)(vi)
-// 	return
-// }
+// Note that VISA identifies handlers uniquely using the userHandle reference.
+func (instr Object) ViUninstallHandler(eventType uint32, userHandle UserCallback) ViStatus {
+	return ViStatus(C.viUninstallHandler((C.ViSession)(instr),
+		(C.ViEventType)(eventType),
+		(C.ViHndlr)(C.get_go_cb()),
+		(C.ViAddr)(unsafe.Pointer(&userHandle))))
+}
 
 // Basic I/O Operations
 
@@ -423,28 +408,57 @@ func (instr Object) ViBufRead(cnt uint32) (buf []byte, retCnt uint32, status ViS
 // Memory I/O Operations
 
 // ViIn8 Reads in an 8-bit value from the specified memory space and offset.
-// ViStatus _VI_FUNC  viIn8           (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress offset, ViPUInt8  val8);
+func (instr Object) ViIn8(space uint16, offset ViBusAddress) (val uint8, status ViStatus) {
+	status = ViStatus(C.viIn8((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(*C.ViUInt8)(&val)))
+	return val, status
+}
 
 // ViOut8 Writes an 8-bit value to the specified memory space and offset.
-// ViStatus _VI_FUNC  viOut8          (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress offset, ViUInt8   val8);
+func (instr Object) viOut8(space uint16, offset ViBusAddress, val uint8) ViStatus {
+	return ViStatus(C.viOut8((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViUInt8)(val)))
+}
 
 // ViIn16 Reads in an 16-bit value from the specified memory space and offset.
-// ViStatus _VI_FUNC  viIn16          (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress offset, ViPUInt16 val16);
+func (instr Object) ViIn16(space uint16, offset ViBusAddress) (val uint16, status ViStatus) {
+	status = ViStatus(C.viIn16((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(*C.ViUInt16)(&val)))
+	return val, status
+}
 
 // ViOut16 Writes an 16-bit value to the specified memory space and offset.
 // ViStatus _VI_FUNC  viOut16         (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViUInt16  val16);
+func (instr Object) viOut16(space uint16, offset ViBusAddress, val uint16) ViStatus {
+	return ViStatus(C.viOut16((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViUInt16)(val)))
+}
 
 // ViIn32 Reads in an 32-bit value from the specified memory space and offset.
-// ViStatus _VI_FUNC  viIn32          (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress offset, ViPUInt32 val32);
+func (instr Object) ViIn32(space uint16, offset ViBusAddress) (val uint32, status ViStatus) {
+	status = ViStatus(C.viIn32((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(*C.ViUInt32)(&val)))
+	return val, status
+}
 
 // ViOut32 Writes an 32-bit value to the specified memory space and offset.
-// ViStatus _VI_FUNC  viOut32         (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress offset, ViUInt32  val32);
+func (instr Object) viOut32(space uint16, offset ViBusAddress, val uint32) ViStatus {
+	return ViStatus(C.viOut32((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViUInt32)(val)))
+}
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
 
