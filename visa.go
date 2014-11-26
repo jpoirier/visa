@@ -27,6 +27,12 @@ package visa
 #cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa
 #include <stdlib.h>
 #include <visa.h>
+
+#if defined(_VI_INT64_UINT64_DEFINED) && defined(_VISA_ENV_IS_64_BIT)
+
+#else
+
+#endif
 */
 import "C"
 import "unsafe"
@@ -36,6 +42,9 @@ var PackageVersion string = "v0.1"
 type ViStatus int32
 type Session uint32
 type Object uint32
+type ViBusAddress C.ViBusAddress
+type ViBusSize C.ViBusSize
+type ViAttrState C.ViAttrState
 
 // Resource Manager Functions and Operations
 
@@ -548,16 +557,37 @@ func (instr Object) ViBufRead(cnt uint32) (buf []byte, retCnt uint32,
 // #endif
 
 // ViMove Moves a block of data.
-// ViStatus _VI_FUNC  viMove          (ViSession vi, ViUInt16 srcSpace, ViBusAddress srcOffset,
-//                                     ViUInt16 srcWidth, ViUInt16 destSpace,
-//                                     ViBusAddress destOffset, ViUInt16 destWidth,
-//                                     ViBusSize srcLength);
+func (instr Object) ViMove(srcSpace uint16, srcOffset ViBusAddress, srcWidth uint16,
+	destSpace uint16, destOffset ViBusAddress, destWidth uint16,
+	srcLength ViBusSize) ViStatus {
+
+	status := ViStatus(C.viMove((C.ViSession)(instr),
+		(C.ViUInt16)(srcSpace),
+		(C.ViBusAddress)(srcOffset),
+		(C.ViUInt16)(srcWidth),
+		(C.ViUInt16)(destSpace),
+		(C.ViBusAddress)(destOffset),
+		(C.ViUInt16)(destWidth),
+		(C.ViBusSize)(srcLength)))
+	return status
+}
 
 // ViMoveAsync Moves a block of data asynchronously.
-// ViStatus _VI_FUNC  viMoveAsync     (ViSession vi, ViUInt16 srcSpace, ViBusAddress srcOffset,
-//                                     ViUInt16 srcWidth, ViUInt16 destSpace,
-//                                     ViBusAddress destOffset, ViUInt16 destWidth,
-//                                     ViBusSize srcLength, ViPJobId jobId);
+func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress,
+	srcWidth, destSpace uint16, destOffset ViBusAddress, destWidth uint16,
+	srcLength ViBusSize) (jobId uint32, status ViStatus) {
+
+	status = ViStatus(C.viMoveAsync((C.ViSession)(instr),
+		(C.ViUInt16)(srcSpace),
+		(C.ViBusAddress)(srcOffset),
+		(C.ViUInt16)(srcWidth),
+		(C.ViUInt16)(destSpace),
+		(C.ViBusAddress)(destOffset),
+		(C.ViUInt16)(destWidth),
+		(C.ViBusSize)(srcLength),
+		(*C.ViJobId)(unsafe.Pointer(&jobId))))
+	return jobId, status
+}
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
 // ViStatus _VI_FUNC  viMoveEx        (ViSession vi, ViUInt16 srcSpace, ViBusAddress64 srcOffset,
@@ -575,9 +605,26 @@ func (instr Object) ViBufRead(cnt uint32) (buf []byte, retCnt uint32,
 // ViStatus _VI_FUNC  viMapAddress    (ViSession vi, ViUInt16 mapSpace, ViBusAddress mapOffset,
 //                                     ViBusSize mapSize, ViBoolean access,
 //                                     ViAddr suggested, ViPAddr address);
+func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress,
+	mapSize ViBusSize, access uint16, suggested *byte) (address *byte,
+	status ViStatus) {
+
+	status = ViStatus(C.viMapAddress((C.ViSession)(instr),
+		(C.ViUInt16)(mapSpace),
+		(C.ViBusAddress)(mapOffset),
+		(C.ViBusSize)(mapSize),
+		(C.ViBoolean)(access),
+		(C.ViAddr)(unsafe.Pointer(suggested)),
+		(*C.ViAddr)(unsafe.Pointer(&address))))
+	return address, status
+}
 
 // ViUnmapAddress Unmaps memory space previously mapped by ViMapAddress().
 // ViStatus _VI_FUNC  viUnmapAddress  (ViSession vi);
+func (instr Object) ViUnmapAddress() ViStatus {
+	status := ViStatus(C.viUnmapAddress((C.ViSession)(instr)))
+	return status
+}
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
 // ViStatus _VI_FUNC  viMapAddressEx  (ViSession vi, ViUInt16 mapSpace, ViBusAddress64 mapOffset,
