@@ -16,3 +16,5 @@ to cross compile
 - go build visa,go defs.go
 
 for compile checks I created a stubbed 64-bit version of libvisa.so
+
+https://code.google.com/p/go-wiki/wiki/cgo
