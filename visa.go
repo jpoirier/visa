@@ -62,8 +62,7 @@ func ViOpenDefaultRM() (rm Session, status ViStatus) {
 
 var ViGetDefaultRM = ViOpenDefaultRM
 
-// ViFindRsrc queries a VISA system to locate the resources associated with a
-// specified interface.
+// ViFindRsrc queries a VISA system to locate the resources associated with a specified interface.
 func (rm Session) ViFindRsrc(expr string) (findList, retCnt uint32, desc string, status ViStatus) {
 	cexpr := (*C.ViChar)(C.CString(expr))
 	defer C.free(unsafe.Pointer(cexpr))
@@ -264,8 +263,7 @@ func (instr Object) ViReadAsync(cnt uint32) (buf []byte, jobId uint32, status Vi
 	return buf, jobId, status
 }
 
-// ViReadToFile Reads data synchronously and stores the transferred
-// data in a file.
+// ViReadToFile Reads data synchronously and stores the transferred data in a file.
 func (instr Object) ViReadToFile(filename string, cnt uint32) (retCnt uint32, status ViStatus) {
 	cfilename := (*C.ViChar)(C.CString(filename))
 	defer C.free(unsafe.Pointer(cfilename))
@@ -349,8 +347,7 @@ func (instr Object) ViBufWrite(buf []byte, cnt uint32) (retCnt uint32, status Vi
 	return retCnt, status
 }
 
-// ViBufRead Reads data from a device or interface through the use of
-// a formatted I/O read buffer.
+// ViBufRead Reads data from a device or interface through the use of a formatted I/O read buffer.
 func (instr Object) ViBufRead(cnt uint32) (buf []byte, retCnt uint32, status ViStatus) {
 	buf = make([]byte, cnt)
 	status = ViStatus(C.viBufRead((C.ViSession)(instr),
@@ -483,8 +480,7 @@ func (instr Object) viOut32(space uint16, offset ViBusAddress, val uint32) ViSta
 //                                     ViBusAddress64 offset, ViUInt64  val64);
 // #endif
 
-// ViMoveIn8 Moves a block of data from the specified address space and
-// offset to local memory.
+// ViMoveIn8 Moves a block of data from the specified address space and offset to local memory.
 func (instr Object) ViMoveIn8(space uint16, offset ViBusAddress, length ViBusSize) ([]uint8, ViStatus) {
 	buf := make([]uint8, length)
 	status := ViStatus(C.viMoveIn8((C.ViSession)(instr),
@@ -504,8 +500,7 @@ func (instr Object) ViMoveOut8(space uint16, offset ViBusAddress, length ViBusSi
 		(C.ViAUInt8)(unsafe.Pointer(&buf[0]))))
 }
 
-// ViMoveIn16 Moves a block of data from the specified address space and
-// offset to local memory.
+// ViMoveIn16 Moves a block of data from the specified address space and offset to local memory.
 func (instr Object) ViMoveIn16(space uint16, offset ViBusAddress, length ViBusSize) ([]uint16, ViStatus) {
 	buf := make([]uint16, length)
 	status := ViStatus(C.viMoveIn16((C.ViSession)(instr),
@@ -516,8 +511,7 @@ func (instr Object) ViMoveIn16(space uint16, offset ViBusAddress, length ViBusSi
 	return buf, status
 }
 
-// ViMoveOut16 Moves a block of data from local memory to the specified
-// address space and offset.
+// ViMoveOut16 Moves a block of data from local memory to the specified address space and offset.
 func (instr Object) ViMoveOut16(space uint16, offset ViBusAddress, length ViBusSize, buf []uint16) ViStatus {
 	return ViStatus(C.viMoveOut16((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -526,8 +520,7 @@ func (instr Object) ViMoveOut16(space uint16, offset ViBusAddress, length ViBusS
 		(C.ViAUInt16)(unsafe.Pointer(&buf[0]))))
 }
 
-// ViMoveIn32 Moves a block of data from the specified address space and
-// offset to local memory.
+// ViMoveIn32 Moves a block of data from the specified address space and offset to local memory.
 func (instr Object) ViMoveIn32(space uint16, offset ViBusAddress, length ViBusSize) ([]uint32, ViStatus) {
 	buf := make([]uint32, length)
 	status := ViStatus(C.viMoveIn32((C.ViSession)(instr),
@@ -538,10 +531,7 @@ func (instr Object) ViMoveIn32(space uint16, offset ViBusAddress, length ViBusSi
 	return buf, status
 }
 
-// ViMoveOut32 Moves a block of data from local memory to the specified
-// address space and offset.
-// ViStatus _VI_FUNC  viMoveOut32     (ViSession vi, ViUInt16 space, ViBusAddress offset,
-//                                     ViBusSize length, ViAUInt32 buf32);
+// ViMoveOut32 Moves a block of data from local memory to the specified address space and offset.
 func (instr Object) ViMoveOut32(space uint16, offset ViBusAddress, length ViBusSize, buf []uint32) ViStatus {
 	return ViStatus(C.viMoveOut32((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -614,8 +604,7 @@ func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress, srcWidt
 //                                     ViBusSize srcLength, ViPJobId jobId);
 // #endif
 
-// ViMapAddress Maps the specified memory space into the process’s
-// address space.
+// ViMapAddress Maps the specified memory space into the process’s address space.
 func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress, mapSize ViBusSize,
 	access uint16, suggested *byte) (address *byte, status ViStatus) {
 
@@ -641,22 +630,38 @@ func (instr Object) ViUnmapAddress() ViStatus {
 // #endif
 
 // ViPeek8 Reads an 8-bit value from the specified address.
-// void     _VI_FUNC  viPeek8         (ViSession vi, ViAddr address, ViPUInt8  val8);
+func (instr Object) ViPeek8(address unsafe.Pointer) (val uint8) {
+	C.viPeek8((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt8)(&val))
+	return val
+}
 
 // ViPoke8 Writes an 8-bit value to the specified address.
-// void     _VI_FUNC  viPoke8         (ViSession vi, ViAddr address, ViUInt8   val8);
+func (instr Object) ViPoke8(address unsafe.Pointer, val uint8) {
+	C.viPoke8((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt8)(val))
+}
 
 // ViPeek16 Reads an 16-bit value from the specified address.
-// void     _VI_FUNC  viPeek16        (ViSession vi, ViAddr address, ViPUInt16 val16);
+func (instr Object) ViPeek16(address unsafe.Pointer) (val uint16) {
+	C.viPeek16((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt16)(&val))
+	return val
+}
 
 // ViPoke16 Writes an 16-bit value to the specified address.
-// void     _VI_FUNC  viPoke16        (ViSession vi, ViAddr address, ViUInt16  val16);
+func (instr Object) ViPoke16(address unsafe.Pointer, val uint16) {
+	C.viPoke16((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt16)(val))
+}
 
 // ViPeek32 Reads an 32-bit value from the specified address.
-// void     _VI_FUNC  viPeek32        (ViSession vi, ViAddr address, ViPUInt32 val32);
+func (instr Object) ViPeek32(address unsafe.Pointer) (val uint32) {
+	C.viPeek32((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt32)(&val))
+	return val
+}
 
 // ViPoke32 Writes an 32-bit value to the specified address.
 // void     _VI_FUNC  viPoke32        (ViSession vi, ViAddr address, ViUInt32  val32);
+func (instr Object) ViPoke32(address unsafe.Pointer, val uint32) {
+	C.viPoke32((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt32)(val))
+}
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
 // Reads an 64-bit value from the specified address.
