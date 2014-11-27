@@ -46,6 +46,7 @@ type ViStatus int32
 type Session uint32
 type Object uint32
 type ViBusAddress C.ViBusAddress
+type ViPBusAddress C.ViPBusAddress
 type ViBusSize C.ViBusSize
 type ViAttrState C.ViAttrState
 
@@ -618,7 +619,7 @@ func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress, mapSiz
 	return address, status
 }
 
-// ViUnmapAddress Unmaps memory space previously mapped by ViMapAddress().
+// ViUnmapAddress Unmaps memory space previously mapped by ViMapAddress.
 func (instr Object) ViUnmapAddress() ViStatus {
 	return ViStatus(C.viUnmapAddress((C.ViSession)(instr)))
 }
@@ -674,10 +675,17 @@ func (instr Object) ViPoke32(address unsafe.Pointer, val uint32) {
 // Shared Memory Operations
 
 // ViMemAlloc Allocates memory from a device’s memory region.
-// ViStatus _VI_FUNC  viMemAlloc      (ViSession vi, ViBusSize size, ViPBusAddress offset);
+func (instr Object) ViMemAlloc(size ViBusSize) (offset ViBusAddress, status ViStatus) {
+	status = ViStatus(C.viMemAlloc((C.ViSession)(instr),
+		(C.ViBusSize)(size),
+		(*C.ViBusAddress)(&offset)))
+	return offset, status
+}
 
 // ViMemFree Frees memory previously allocated using the viMemAlloc() operation.
-// ViStatus _VI_FUNC  viMemFree       (ViSession vi, ViBusAddress offset);
+func (instr Object) ViMemFree(offset ViBusAddress) ViStatus {
+	return ViStatus(C.viMemFree((C.ViSession)(instr), (C.ViBusAddress)(offset)))
+}
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
 // ViStatus _VI_FUNC  viMemAllocEx    (ViSession vi, ViBusSize size, ViPBusAddress64 offset);
