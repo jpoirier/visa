@@ -434,8 +434,6 @@ func (instr Object) ViIn16(space uint16, offset ViBusAddress) (val uint16, statu
 }
 
 // ViOut16 Writes an 16-bit value to the specified memory space and offset.
-// ViStatus _VI_FUNC  viOut16         (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress offset, ViUInt16  val16);
 func (instr Object) viOut16(space uint16, offset ViBusAddress, val uint16) ViStatus {
 	return ViStatus(C.viOut16((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -461,15 +459,12 @@ func (instr Object) viOut32(space uint16, offset ViBusAddress, val uint32) ViSta
 }
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
-
 // ViIn64 Reads in an 64-bit value from the specified memory space and offset.
 // ViStatus _VI_FUNC  viIn64          (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViPUInt64 val64);
-
 // ViOut64 Writes an 64-bit value to the specified memory space and offset.
 // ViStatus _VI_FUNC  viOut64         (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress offset, ViUInt64  val64);
-
 // ViStatus _VI_FUNC  viIn8Ex         (ViSession vi, ViUInt16 space,
 //                                     ViBusAddress64 offset, ViPUInt8  val8);
 // ViStatus _VI_FUNC  viOut8Ex        (ViSession vi, ViUInt16 space,
@@ -490,33 +485,70 @@ func (instr Object) viOut32(space uint16, offset ViBusAddress, val uint32) ViSta
 
 // ViMoveIn8 Moves a block of data from the specified address space and
 // offset to local memory.
-// ViStatus _VI_FUNC  viMoveIn8       (ViSession vi, ViUInt16 space, ViBusAddress offset,
-//                                     ViBusSize length, ViAUInt8  buf8);
+func (instr Object) ViMoveIn8(space uint16, offset ViBusAddress, length ViBusSize) ([]uint8, ViStatus) {
+	buf := make([]uint8, length)
+	status := ViStatus(C.viMoveIn8((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViBusSize)(length),
+		(C.ViAUInt8)(unsafe.Pointer(&buf[0]))))
+	return buf, status
+}
 
 // ViMoveOut8 Moves a block of data from local memory to the specified
-// address space and offset.
-// ViStatus _VI_FUNC  viMoveOut8      (ViSession vi, ViUInt16 space, ViBusAddress offset,
-//                                     ViBusSize length, ViAUInt8  buf8);
+func (instr Object) ViMoveOut8(space uint16, offset ViBusAddress, length ViBusSize, buf []uint8) ViStatus {
+	return ViStatus(C.viMoveOut8((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViBusSize)(length),
+		(C.ViAUInt8)(unsafe.Pointer(&buf[0]))))
+}
 
 // ViMoveIn16 Moves a block of data from the specified address space and
 // offset to local memory.
-// ViStatus _VI_FUNC  viMoveIn16      (ViSession vi, ViUInt16 space, ViBusAddress offset,
-//                                     ViBusSize length, ViAUInt16 buf16);
+func (instr Object) ViMoveIn16(space uint16, offset ViBusAddress, length ViBusSize) ([]uint16, ViStatus) {
+	buf := make([]uint16, length)
+	status := ViStatus(C.viMoveIn16((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViBusSize)(length),
+		(C.ViAUInt16)(unsafe.Pointer(&buf[0]))))
+	return buf, status
+}
 
 // ViMoveOut16 Moves a block of data from local memory to the specified
 // address space and offset.
-// ViStatus _VI_FUNC  viMoveOut16     (ViSession vi, ViUInt16 space, ViBusAddress offset,
-//                                     ViBusSize length, ViAUInt16 buf16);
+func (instr Object) ViMoveOut16(space uint16, offset ViBusAddress, length ViBusSize, buf []uint16) ViStatus {
+	return ViStatus(C.viMoveOut16((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViBusSize)(length),
+		(C.ViAUInt16)(unsafe.Pointer(&buf[0]))))
+}
 
 // ViMoveIn32 Moves a block of data from the specified address space and
 // offset to local memory.
-// ViStatus _VI_FUNC  viMoveIn32      (ViSession vi, ViUInt16 space, ViBusAddress offset,
-//                                     ViBusSize length, ViAUInt32 buf32);
+func (instr Object) ViMoveIn32(space uint16, offset ViBusAddress, length ViBusSize) ([]uint32, ViStatus) {
+	buf := make([]uint32, length)
+	status := ViStatus(C.viMoveIn32((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViBusSize)(length),
+		(C.ViAUInt32)(unsafe.Pointer(&buf[0]))))
+	return buf, status
+}
 
 // ViMoveOut32 Moves a block of data from local memory to the specified
 // address space and offset.
 // ViStatus _VI_FUNC  viMoveOut32     (ViSession vi, ViUInt16 space, ViBusAddress offset,
 //                                     ViBusSize length, ViAUInt32 buf32);
+func (instr Object) ViMoveOut32(space uint16, offset ViBusAddress, length ViBusSize, buf []uint32) ViStatus {
+	return ViStatus(C.viMoveOut32((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViBusSize)(length),
+		(C.ViAUInt32)(unsafe.Pointer(&buf[0]))))
+}
 
 // #if defined(_VI_INT64_UINT64_DEFINED)
 // ViStatus _VI_FUNC  viMoveIn64      (ViSession vi, ViUInt16 space, ViBusAddress offset,
@@ -543,8 +575,7 @@ func (instr Object) viOut32(space uint16, offset ViBusAddress, val uint32) ViSta
 
 // ViMove Moves a block of data.
 func (instr Object) ViMove(srcSpace uint16, srcOffset ViBusAddress, srcWidth uint16,
-	destSpace uint16, destOffset ViBusAddress, destWidth uint16,
-	srcLength ViBusSize) ViStatus {
+	destSpace uint16, destOffset ViBusAddress, destWidth uint16, srcLength ViBusSize) ViStatus {
 
 	return ViStatus(C.viMove((C.ViSession)(instr),
 		(C.ViUInt16)(srcSpace),
@@ -557,9 +588,8 @@ func (instr Object) ViMove(srcSpace uint16, srcOffset ViBusAddress, srcWidth uin
 }
 
 // ViMoveAsync Moves a block of data asynchronously.
-func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress, srcWidth,
-	destSpace uint16, destOffset ViBusAddress, destWidth uint16,
-	srcLength ViBusSize) (jobId uint32, status ViStatus) {
+func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress, srcWidth, destSpace uint16,
+	destOffset ViBusAddress, destWidth uint16, srcLength ViBusSize) (jobId uint32, status ViStatus) {
 
 	status = ViStatus(C.viMoveAsync((C.ViSession)(instr),
 		(C.ViUInt16)(srcSpace),
