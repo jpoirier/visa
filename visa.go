@@ -17,23 +17,28 @@
 // NI-VISA Overview:
 //     http://www.ni.com/white-paper/3702/en/
 
-// export CGO_ENABLED=1
-// export GOARCH=386
-
 package visa
 
 /*
-#cgo linux CFLAGS: -I.
-#cgo linux LDFLAGS: -L. -lvisa
-#cgo darwin CFLAGS: -I.
+#if defined(_VISA_ENV_IS_64_BIT)
+#cgo linux LDFLAGS: -L. -lvisa64
 #cgo darwin LDFLAGS: -framework VISA
-#cgo windows CFLAGS: -I.
+#cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa64
+#else
+#cgo linux LDFLAGS: -L. -lvisa
+#cgo darwin LDFLAGS: -framework VISA
 #cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa
+#endif
+
+#cgo linux CFLAGS: -I.
+#cgo darwin CFLAGS: -I.
+#cgo windows CFLAGS: -I.
+
 #include <stdlib.h>
 #include <visa.h>
 
 extern void go_cb(ViSession, ViEventType, ViEvent, ViAddr);
-ViHndlr get_go_cb() {
+ViHndlr get_go_cb(void) {
 	return (ViHndlr)go_cb;
 }
 */
@@ -456,30 +461,22 @@ func (instr Object) viOut32(space uint16, offset ViBusAddress, val uint32) ViSta
 		(C.ViUInt32)(val)))
 }
 
-// #if defined(_VI_INT64_UINT64_DEFINED)
 // ViIn64 Reads in an 64-bit value from the specified memory space and offset.
-// ViStatus _VI_FUNC  viIn64          (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress offset, ViPUInt64 val64);
+func (instr Object) ViIn64(space uint16, offset ViBusAddress) (val uint64, status ViStatus) {
+	status = ViStatus(C.viIn64((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(*C.ViUInt64)(&val)))
+	return val, status
+}
+
 // ViOut64 Writes an 64-bit value to the specified memory space and offset.
-// ViStatus _VI_FUNC  viOut64         (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress offset, ViUInt64  val64);
-// ViStatus _VI_FUNC  viIn8Ex         (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress64 offset, ViPUInt8  val8);
-// ViStatus _VI_FUNC  viOut8Ex        (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress64 offset, ViUInt8   val8);
-// ViStatus _VI_FUNC  viIn16Ex        (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress64 offset, ViPUInt16 val16);
-// ViStatus _VI_FUNC  viOut16Ex       (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress64 offset, ViUInt16  val16);
-// ViStatus _VI_FUNC  viIn32Ex        (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress64 offset, ViPUInt32 val32);
-// ViStatus _VI_FUNC  viOut32Ex       (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress64 offset, ViUInt32  val32);
-// ViStatus _VI_FUNC  viIn64Ex        (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress64 offset, ViPUInt64 val64);
-// ViStatus _VI_FUNC  viOut64Ex       (ViSession vi, ViUInt16 space,
-//                                     ViBusAddress64 offset, ViUInt64  val64);
-// #endif
+func (instr Object) viOut64(space uint16, offset ViBusAddress, val uint64) ViStatus {
+	return ViStatus(C.viOut64((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViUInt64)(val)))
+}
 
 // ViMoveIn8 Moves a block of data from the specified address space and offset to local memory.
 func (instr Object) ViMoveIn8(space uint16, offset ViBusAddress, length ViBusSize) ([]uint8, ViStatus) {
@@ -541,28 +538,25 @@ func (instr Object) ViMoveOut32(space uint16, offset ViBusAddress, length ViBusS
 		(C.ViAUInt32)(unsafe.Pointer(&buf[0]))))
 }
 
-// #if defined(_VI_INT64_UINT64_DEFINED)
-// ViStatus _VI_FUNC  viMoveIn64      (ViSession vi, ViUInt16 space, ViBusAddress offset,
-//                                     ViBusSize length, ViAUInt64 buf64);
-// ViStatus _VI_FUNC  viMoveOut64     (ViSession vi, ViUInt16 space, ViBusAddress offset,
-//                                     ViBusSize length, ViAUInt64 buf64);
-// ViStatus _VI_FUNC  viMoveIn8Ex     (ViSession vi, ViUInt16 space, ViBusAddress64 offset,
-//                                     ViBusSize length, ViAUInt8  buf8);
-// ViStatus _VI_FUNC  viMoveOut8Ex    (ViSession vi, ViUInt16 space, ViBusAddress64 offset,
-//                                     ViBusSize length, ViAUInt8  buf8);
-// ViStatus _VI_FUNC  viMoveIn16Ex    (ViSession vi, ViUInt16 space, ViBusAddress64 offset,
-//                                     ViBusSize length, ViAUInt16 buf16);
-// ViStatus _VI_FUNC  viMoveOut16Ex   (ViSession vi, ViUInt16 space, ViBusAddress64 offset,
-//                                     ViBusSize length, ViAUInt16 buf16);
-// ViStatus _VI_FUNC  viMoveIn32Ex    (ViSession vi, ViUInt16 space, ViBusAddress64 offset,
-//                                     ViBusSize length, ViAUInt32 buf32);
-// ViStatus _VI_FUNC  viMoveOut32Ex   (ViSession vi, ViUInt16 space, ViBusAddress64 offset,
-//                                     ViBusSize length, ViAUInt32 buf32);
-// ViStatus _VI_FUNC  viMoveIn64Ex    (ViSession vi, ViUInt16 space, ViBusAddress64 offset,
-//                                     ViBusSize length, ViAUInt64 buf64);
-// ViStatus _VI_FUNC  viMoveOut64Ex   (ViSession vi, ViUInt16 space, ViBusAddress64 offset,
-//                                     ViBusSize length, ViAUInt64 buf64);
-// #endif
+// ViMoveIn64 Moves a block of data from the specified address space and offset to local memory.
+func (instr Object) ViMoveIn64(space uint16, offset ViBusAddress, length ViBusSize) ([]uint64, ViStatus) {
+	buf := make([]uint64, length)
+	status := ViStatus(C.viMoveIn64((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViBusSize)(length),
+		(C.ViAUInt64)(unsafe.Pointer(&buf[0]))))
+	return buf, status
+}
+
+// ViMoveOut64 Moves a block of data from local memory to the specified address space and offset.
+func (instr Object) ViMoveOut64(space uint16, offset ViBusAddress, length ViBusSize, buf []uint64) ViStatus {
+	return ViStatus(C.viMoveOut64((C.ViSession)(instr),
+		(C.ViUInt16)(space),
+		(C.ViBusAddress)(offset),
+		(C.ViBusSize)(length),
+		(C.ViAUInt64)(unsafe.Pointer(&buf[0]))))
+}
 
 // ViMove Moves a block of data.
 func (instr Object) ViMove(srcSpace uint16, srcOffset ViBusAddress, srcWidth uint16,
@@ -594,17 +588,6 @@ func (instr Object) ViMoveAsync(srcSpace uint16, srcOffset ViBusAddress, srcWidt
 	return jobId, status
 }
 
-// #if defined(_VI_INT64_UINT64_DEFINED)
-// ViStatus _VI_FUNC  viMoveEx        (ViSession vi, ViUInt16 srcSpace, ViBusAddress64 srcOffset,
-//                                     ViUInt16 srcWidth, ViUInt16 destSpace,
-//                                     ViBusAddress64 destOffset, ViUInt16 destWidth,
-//                                     ViBusSize srcLength);
-// ViStatus _VI_FUNC  viMoveAsyncEx   (ViSession vi, ViUInt16 srcSpace, ViBusAddress64 srcOffset,
-//                                     ViUInt16 srcWidth, ViUInt16 destSpace,
-//                                     ViBusAddress64 destOffset, ViUInt16 destWidth,
-//                                     ViBusSize srcLength, ViPJobId jobId);
-// #endif
-
 // ViMapAddress Maps the specified memory space into the process’s address space.
 func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress, mapSize ViBusSize,
 	access uint16, suggested *byte) (address *byte, status ViStatus) {
@@ -623,12 +606,6 @@ func (instr Object) ViMapAddress(mapSpace uint16, mapOffset ViBusAddress, mapSiz
 func (instr Object) ViUnmapAddress() ViStatus {
 	return ViStatus(C.viUnmapAddress((C.ViSession)(instr)))
 }
-
-// #if defined(_VI_INT64_UINT64_DEFINED)
-// ViStatus _VI_FUNC  viMapAddressEx  (ViSession vi, ViUInt16 mapSpace, ViBusAddress64 mapOffset,
-//                                     ViBusSize mapSize, ViBoolean access,
-//                                     ViAddr suggested, ViPAddr address);
-// #endif
 
 // ViPeek8 Reads an 8-bit value from the specified address.
 func (instr Object) ViPeek8(address unsafe.Pointer) (val uint8) {
@@ -664,13 +641,16 @@ func (instr Object) ViPoke32(address unsafe.Pointer, val uint32) {
 	C.viPoke32((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt32)(val))
 }
 
-// #if defined(_VI_INT64_UINT64_DEFINED)
 // Reads an 64-bit value from the specified address.
-// void     _VI_FUNC  viPeek64        (ViSession vi, ViAddr address, ViPUInt64 val64);
+func (instr Object) ViPeek64(address unsafe.Pointer) (val uint64) {
+	C.viPeek64((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt64)(&val))
+	return val
+}
 
 // Writes an 64-bit value to the specified address.
-// void     _VI_FUNC  viPoke64        (ViSession vi, ViAddr address, ViUInt64  val64);
-// #endif
+func (instr Object) ViPoke64(address unsafe.Pointer, val uint64) {
+	C.viPoke64((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt64)(val))
+}
 
 // Shared Memory Operations
 
@@ -686,11 +666,6 @@ func (instr Object) ViMemAlloc(size ViBusSize) (offset ViBusAddress, status ViSt
 func (instr Object) ViMemFree(offset ViBusAddress) ViStatus {
 	return ViStatus(C.viMemFree((C.ViSession)(instr), (C.ViBusAddress)(offset)))
 }
-
-// #if defined(_VI_INT64_UINT64_DEFINED)
-// ViStatus _VI_FUNC  viMemAllocEx    (ViSession vi, ViBusSize size, ViPBusAddress64 offset);
-// ViStatus _VI_FUNC  viMemFreeEx     (ViSession vi, ViBusAddress64 offset);
-// #endif
 
 // Interface Specific Operations
 
@@ -763,9 +738,15 @@ func ViVersSubMinor() uint32 {
 	return uint32((ViVersion() & 0x000000FF))
 }
 
-// ViPxiReserveTriggers
-// ViStatus _VI_FUNC  viPxiReserveTriggers(ViSession vi, ViInt16 cnt, ViAInt16 trigBuses,
-//                                     ViAInt16 trigLines, ViPInt16 failureIndex);
+// ViPxiReserveTriggers Reserves multiple trigger lines that the caller can then map and/or assert.
+func (instr Object) ViPxiReserveTriggers(cnt int16, trigBuses, trigLines *int16) (failureIndex int16, status ViStatus) {
+	status = ViStatus(C.viPxiReserveTriggers((C.ViSession)(instr),
+		(C.ViInt16)(cnt),
+		(*C.ViInt16)(trigBuses),
+		(*C.ViInt16)(trigLines),
+		(*C.ViInt16)(&failureIndex)))
+	return failureIndex, status
+}
 
-// viVxiServantResponse
+// ViVxiServantResponse
 // ViStatus _VI_FUNC viVxiServantResponse(ViSession vi, ViInt16 mode, ViUInt32 resp);
