@@ -5,11 +5,14 @@
 // Package visa wraps National Instruments VISA (Virtual Instrument Software
 // Architecture) driver. The driver allows a client application to communicate
 // with most instrumentation buses including GPIB, USB, Serial, and Ethernet.
-// VISA is an industry standard for instrument communications.
+// The Virtual Instrument Software Architecture (VISA) is a standard for
+// configuring, programming, and troubleshooting instrumentation systems
+// comprising GPIB, VXI, PXI, serial (RS232/RS485), Ethernet/LXI, and/or USB i
+// nterfaces.
 //
 // The package is low level and, for the most part, is one-to-one with the
-// exported C functions it wraps. Clients would typically build instrument
-// drivers around the package but it can also be used directly.
+// exported C functions it wraps. Clients would typically build an instrument
+// specific driver around the package but it can also be used directly.
 //
 // NI-VISA Drivers:
 //     http://www.ni.com/downloads/ni-drivers/
@@ -20,14 +23,14 @@
 package visa
 
 /*
-#if defined(_VISA_ENV_IS_64_BIT)
+#if defined(__amd64) || defined(__amd64__) || defined(__x86_64) || defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 #cgo linux LDFLAGS: -L. -lvisa64
 #cgo darwin LDFLAGS: -framework VISA
 #cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa64
 #else
 #cgo linux LDFLAGS: -L. -lvisa
 #cgo darwin LDFLAGS: -framework VISA
-#cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa
+#cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa32
 #endif
 
 #cgo linux CFLAGS: -I.
@@ -366,10 +369,24 @@ func (instr Object) ViBufRead(cnt uint32) (buf []byte, retCnt uint32, status ViS
 // ViPrintf Converts, formats, and sends the parameters (designated by ...)
 // to the device as specified by the format string.
 // ViStatus _VI_FUNCC viPrintf        (ViSession vi, ViString writeFmt, ...);
+// func (instr Object) ViPrintf(writeFmt string, args ...interface{}) ViStatus {
+// 	cwriteFmt := (*C.ViChar)(C.CString(writeFmt))
+// 	defer C.free(unsafe.Pointer(cwriteFmt))
+// 	return ViStatus(C.viPrintf((C.ViSession)(instr),
+// 		cwriteFmt,
+// 		(*C.ViVAList)(args)))
+// }
 
 // ViVPrintf Converts, formats, and sends the parameters designated by params
 // to the device or interface as specified by the format string.
 // ViStatus _VI_FUNC  viVPrintf       (ViSession vi, ViString writeFmt, ViVAList params);
+// func (instr Object) ViVPrintf(writeFmt string, args ...interface{}) ViStatus {
+// 	cwriteFmt := (*C.ViChar)(C.CString(writeFmt))
+// 	defer C.free(unsafe.Pointer(cwriteFmt))
+// 	return ViStatus(C.viVPrintf((C.ViSession)(instr),
+// 		cwriteFmt,
+// 		(*C.ViVAList)(args)))
+// }
 
 // ViSPrintf Converts, formats, and sends the parameters (designated by ...)
 // to a user-specified buffer as specified by the format string.
@@ -748,5 +765,9 @@ func (instr Object) ViPxiReserveTriggers(cnt int16, trigBuses, trigLines *int16)
 	return failureIndex, status
 }
 
-// ViVxiServantResponse
-// ViStatus _VI_FUNC viVxiServantResponse(ViSession vi, ViInt16 mode, ViUInt32 resp);
+// ViVxiServantResponse ?
+func (instr Object) ViVxiServantResponse(mode int16, resp uint32) ViStatus {
+	return ViStatus(C.viVxiServantResponse((C.ViSession)(instr),
+		(C.ViInt16)(mode),
+		(C.ViUInt32)(resp)))
+}
