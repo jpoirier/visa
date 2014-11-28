@@ -199,14 +199,23 @@ func (instr Object) Terminate(degree, jobId uint16) Status {
 }
 
 // Lock Establishes an access mode to the specified resource.
+func (instr Object) LockExclusive(lockType, timeout uint32) Status {
+	return Status(C.viLock((C.ViSession)(instr),
+		(C.ViAccessMode)(lockType),
+		(C.ViUInt32)(timeout),
+		(*C.ViChar)(nil),
+		(*C.ViChar)(nil)))
+}
+
+// Lock Establishes an access mode to the specified resource.
 func (instr Object) Lock(lockType, timeout uint32, requestedKey string) (string, Status) {
-	crequestedKey := (*C.ViChar)(C.CString(requestedKey))
-	defer C.free(unsafe.Pointer(crequestedKey))
+	rk := (*C.ViChar)(C.CString(requestedKey))
+	defer C.free(unsafe.Pointer(rk))
 	a := make([]byte, 257)
 	status := Status(C.viLock((C.ViSession)(instr),
 		(C.ViAccessMode)(lockType),
 		(C.ViUInt32)(timeout),
-		crequestedKey,
+		rk,
 		(*C.ViChar)(unsafe.Pointer(&a[0]))))
 	return string(a), status
 }
