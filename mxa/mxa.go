@@ -69,17 +69,18 @@ func (m *Mxa) CreateFolder(name string) (status vi.Status) {
 // SetTraceType Sets trace number to trace type.
 func (m *Mxa) SetTraceType(number int, stype string) (status vi.Status) {
 	stype = strings.ToUpper(stype)
+	var b string
 	switch stype {
 	default:
 		return -1
 	case "CLEAR", "WRITE":
-		b := fmt.Sprintf("TRAC%d:TYPE WRITE", number)
+		b = fmt.Sprintf("TRAC%d:TYPE WRITE", number)
 	case "AVERAGE":
-		b := fmt.Sprintf("TRAC%d:TYPE AVERAGE", number)
+		b = fmt.Sprintf("TRAC%d:TYPE AVERAGE", number)
 	case "MAX", "MAXH", "MAXHOLD":
-		b := fmt.Sprintf("TRAC%d:TYPE MAXHOLD", number)
+		b = fmt.Sprintf("TRAC%d:TYPE MAXHOLD", number)
 	case "MIN", "MINH", "MINHOLD":
-		b := fmt.Sprintf("TRAC%d:TYPE MINHOLD", number)
+		b = fmt.Sprintf("TRAC%d:TYPE MINHOLD", number)
 	}
 	_, status = m.instr.Write([]byte(b), uint32(len(b)))
 	return
@@ -107,28 +108,28 @@ func (m *Mxa) ClearAllTraces(number int) (status vi.Status) {
 }
 
 // SetCenterFreqKHz Sets the center crequency freqKhz.
-func (m *Mxa) SetCenterFreqKHz(freqKhz float) (status vi.Status) {
+func (m *Mxa) SetCenterFreqKHz(freqKhz float32) (status vi.Status) {
 	b := fmt.Sprintf("FREQ:CENT %f KHZ", freqKhz)
 	_, status = m.instr.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // SetCenterFreqMHz Sets the center crequency freqMhz.
-func (m *Mxa) SetCenterFreqMHz(freqMhz float) (status vi.Status) {
+func (m *Mxa) SetCenterFreqMHz(freqMhz float32) (status vi.Status) {
 	b := fmt.Sprintf("FREQ:CENT %f MHZ", freqMhz)
 	_, status = m.instr.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // SetCenterFreqGHz Sets the center crequency freqGhz.
-func (m *Mxa) SetCenterFreqGHz(freqGhz float) (status vi.Status) {
+func (m *Mxa) SetCenterFreqGHz(freqGhz float32) (status vi.Status) {
 	b := fmt.Sprintf("FREQ:CENT %f GHZ", freqGhz)
 	_, status = m.instr.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // GetCenterFreqMHz returns the center frequency (MHz).
-func (m *Mxa) GetCenterFreqMHz() (freqMhz float, status vi.Status) {
+func (m *Mxa) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 	b := []byte("FREQ:CENT?")
 	_, status = m.instr.Write(b, uint32(len(b)))
 	if status < vi.SUCCESS {
