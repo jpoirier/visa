@@ -67,7 +67,8 @@ type Object uint32
 type BusAddress C.ViBusAddress
 type PBusAddress C.ViPBusAddress
 type BusSize C.ViBusSize
-type ViAttrState C.ViAttrState
+type AttrState C.ViAttrState
+type Bool C.ViBoolean
 
 //
 type UserCallback func(instr Object, etype, eventContext uint32)
@@ -172,12 +173,8 @@ func (instr Object) SetAttribute(attribute, attrState uint32) Status {
 }
 
 // GetAttribute Retrieves the state of an attribute.
-func (instr Object) GetAttribute(attrName uint32) ([]byte, Status) {
-	attrValue := make([]byte, 257)
-	status := Status(C.viGetAttribute((C.ViObject)(instr),
-		(C.ViAttr)(attrName),
-		unsafe.Pointer(&attrValue[0])))
-	return attrValue, status
+func (instr Object) GetAttribute(attrName uint32, addr unsafe.Pointer) Status {
+	return Status(C.viGetAttribute((C.ViObject)(instr), (C.ViAttr)(attrName), addr))
 }
 
 // StatusDesc Returns a user-readable description of the status code passed to the operation.
