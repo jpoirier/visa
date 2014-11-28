@@ -24,14 +24,14 @@ type Keithley struct {
 
 // OpenGpib Opens a session to the specified resource.
 func (k *Keithley) OpenGpib(rm vi.Session, ctrl, addr, mode, timeout uint32) (status vi.Status) {
-	name := fmt.Sprintf("GPIB%d::%d", ctrl, ddr)
+	name := fmt.Sprintf("GPIB%d::%d", ctrl, addr)
 	k.instr, status = rm.Open(name, mode, timeout)
 	return
 }
 
 // OpenTcp Opens a session to the specified resource.
 func (k *Keithley) OpenTcp(rm vi.Session, ip string, mode, timeout uint32) (status vi.Status) {
-	name := fmt.Sprintf("TCPIP::%s::INSTR", addr)
+	name := fmt.Sprintf("TCPIP::%s::INSTR", ip)
 	k.instr, status = rm.Open(name, mode, timeout)
 	return
 }
