@@ -1,7 +1,6 @@
 package visa
 
 /*
-#cgo windows CFLAGS: -I.
 #include <stdlib.h>
 #include <visa.h>
 */
@@ -624,113 +623,6 @@ const (
 	TRUE  = C.VI_TRUE
 	FALSE = C.VI_FALSE
 
-// This is for fast viPeek/viPoke macros
-
-// #if defined(NIVISA_PEEKPOKE)
-// 	 #if defined(NIVISA_PEEKPOKE_SUPP)
-// 	  #undef NIVISA_PEEKPOKE_SUPP
-// 	 #endif
-
-// 	#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)) && !defined(_NI_mswin16_)
-// 	 /* This macro is supported for all Win32 compilers, including CVI. */
-// 	 #define NIVISA_PEEKPOKE_SUPP
-// 	#elif (defined(_WINDOWS) || defined(_Windows)) && !defined(_CVI_) && !defined(_NI_mswin16_)
-// 	 /* This macro is supported for Borland and Microsoft compilers on Win16, but not CVI. */
-// 	 #define NIVISA_PEEKPOKE_SUPP
-// 	#elif defined(_CVI_) && defined(_NI_sparc_)
-// 	 /* This macro is supported for Solaris 1 and 2, from CVI only. */
-// 	 #define NIVISA_PEEKPOKE_SUPP
-// 	#else
-// 	 /* This macro is not supported on other platforms. */
-// 	#endif
-
-// 	#if defined(NIVISA_PEEKPOKE_SUPP)
-
-// 		extern ViBoolean NI_viImplVISA1;
-// 		ViStatus _VI_FUNC NI_viOpenDefaultRM (ViPSession vi);
-// 		#define viOpenDefaultRM(vi) NI_viOpenDefaultRM(vi)
-
-// 		#define viPeek8(vi,addr,val)                                                \
-// 		   {                                                                        \
-// 		      if ((NI_viImplVISA1) && (*((ViPUInt32)(vi))))                         \
-// 		      {                                                                     \
-// 		         do (*((ViPUInt8)(val)) = *((volatile ViUInt8 _VI_PTR)(addr)));     \
-// 		         while (**((volatile ViUInt8 _VI_PTR _VI_PTR)(vi)) & 0x10);         \
-// 		      }                                                                     \
-// 		      else                                                                  \
-// 		      {                                                                     \
-// 		         (viPeek8)((vi),(addr),(val));                                      \
-// 		      }                                                                     \
-// 		   }
-
-// 		#define viPoke8(vi,addr,val)                                                \
-// 		   {                                                                        \
-// 		      if ((NI_viImplVISA1) && (*((ViPUInt32)(vi))))                         \
-// 		      {                                                                     \
-// 		         do (*((volatile ViUInt8 _VI_PTR)(addr)) = ((ViUInt8)(val)));       \
-// 		         while (**((volatile ViUInt8 _VI_PTR _VI_PTR)(vi)) & 0x10);         \
-// 		      }                                                                     \
-// 		      else                                                                  \
-// 		      {                                                                     \
-// 		         (viPoke8)((vi),(addr),(val));                                      \
-// 		      }                                                                     \
-// 		   }
-
-// 		#define viPeek16(vi,addr,val)                                               \
-// 		   {                                                                        \
-// 		      if ((NI_viImplVISA1) && (*((ViPUInt32)(vi))))                         \
-// 		      {                                                                     \
-// 		         do (*((ViPUInt16)(val)) = *((volatile ViUInt16 _VI_PTR)(addr)));   \
-// 		         while (**((volatile ViUInt8 _VI_PTR _VI_PTR)(vi)) & 0x10);         \
-// 		      }                                                                     \
-// 		      else                                                                  \
-// 		      {                                                                     \
-// 		         (viPeek16)((vi),(addr),(val));                                     \
-// 		      }                                                                     \
-// 		   }
-
-// 		#define viPoke16(vi,addr,val)                                               \
-// 		   {                                                                        \
-// 		      if ((NI_viImplVISA1) && (*((ViPUInt32)(vi))))                         \
-// 		      {                                                                     \
-// 		         do (*((volatile ViUInt16 _VI_PTR)(addr)) = ((ViUInt16)(val)));     \
-// 		         while (**((volatile ViUInt8 _VI_PTR _VI_PTR)(vi)) & 0x10);         \
-// 		      }                                                                     \
-// 		      else                                                                  \
-// 		      {                                                                     \
-// 		         (viPoke16)((vi),(addr),(val));                                     \
-// 		      }                                                                     \
-// 		   }
-
-// 		#define viPeek32(vi,addr,val)                                               \
-// 		   {                                                                        \
-// 		      if ((NI_viImplVISA1) && (*((ViPUInt32)(vi))))                         \
-// 		      {                                                                     \
-// 		         do (*((ViPUInt32)(val)) = *((volatile ViUInt32 _VI_PTR)(addr)));   \
-// 		         while (**((volatile ViUInt8 _VI_PTR _VI_PTR)(vi)) & 0x10);         \
-// 		      }                                                                     \
-// 		      else                                                                  \
-// 		      {                                                                     \
-// 		         (viPeek32)((vi),(addr),(val));                                     \
-// 		      }                                                                     \
-// 		   }
-
-// 		#define viPoke32(vi,addr,val)                                               \
-// 		   {                                                                        \
-// 		      if ((NI_viImplVISA1) && (*((ViPUInt32)(vi))))                         \
-// 		      {                                                                     \
-// 		         do (*((volatile ViUInt32 _VI_PTR)(addr)) = ((ViUInt32)(val)));     \
-// 		         while (**((volatile ViUInt8 _VI_PTR _VI_PTR)(vi)) & 0x10);         \
-// 		      }                                                                     \
-// 		      else                                                                  \
-// 		      {                                                                     \
-// 		         (viPoke32)((vi),(addr),(val));                                     \
-// 		      }                                                                     \
-// 		   }
-
-// 	#endif
-// #endif
-
 // #if defined(NIVISA_PXI) || defined(PXISAVISA_PXI)
 // 	VI_ATTR_PXI_USE_PREALLOC_POOL = C.VI_ATTR_PXI_USE_PREALLOC_POOL
 // #endif
@@ -758,13 +650,4 @@ const (
 // 	VI_USB_END_SHORT = C.VI_USB_END_SHORT
 // 	VI_USB_END_SHORT_OR_COUNT = C.VI_USB_END_SHORT_OR_COUNT
 // #endif
-
-// 	VI_ATTR_FIREWIRE_DEST_UPPER_OFFSET = C.VI_ATTR_FIREWIRE_DEST_UPPER_OFFSET
-// 	VI_ATTR_FIREWIRE_SRC_UPPER_OFFSET = C.VI_ATTR_FIREWIRE_SRC_UPPER_OFFSET
-// 	VI_ATTR_FIREWIRE_WIN_UPPER_OFFSET = C.VI_ATTR_FIREWIRE_WIN_UPPER_OFFSET
-// 	VI_ATTR_FIREWIRE_VENDOR_ID = C.VI_ATTR_FIREWIRE_VENDOR_ID
-// 	VI_ATTR_FIREWIRE_LOWER_CHIP_ID = C.VI_ATTR_FIREWIRE_LOWER_CHIP_ID
-// 	VI_ATTR_FIREWIRE_UPPER_CHIP_ID = C.VI_ATTR_FIREWIRE_UPPER_CHIP_ID
-
-// 	VI_FIREWIRE_DFLT_SPACE = C.VI_FIREWIRE_DFLT_SPACE
 )

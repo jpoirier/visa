@@ -42,9 +42,9 @@ package visa
 #cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa32
 #endif
 
-#cgo linux CFLAGS: -I.
-#cgo darwin CFLAGS: -I.
-#cgo windows CFLAGS: -I.
+#cgo linux CFLAGS:
+#cgo darwin CFLAGS:
+#cgo windows CFLAGS:
 
 #include <stdlib.h>
 #include <visa.h>
