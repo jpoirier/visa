@@ -24,25 +24,23 @@ func main() {
 		fmt.Println("Could not open a session to the VISA Resource Manager!")
 		return
 	}
+	defer rm.Close()
 
 	instr, status := rm.Open("TCPIP0::ftp.ni.com::21::SOCKET", vi.NULL, vi.NULL)
 	if status < vi.SUCCESS {
 		fmt.Println("An error occurred opening the session to TCPIP0::ftp.ni.com::21::SOCKET")
-		rm.Close()
 		return
 	}
+	defer instr.Close()
 
 	status = instr.SetAttribute(vi.ATTR_TCPIP_NODELAY, vi.TRUE)
 	if status < vi.SUCCESS {
 		fmt.Println("An error occurred setting the attributes...")
-		instr.Close()
-		rm.Close()
 		return
 	}
 	b, _, status := instr.Read(25)
 	if status < vi.SUCCESS {
 		fmt.Printf("Read failed with error code %x \n", status)
-		rm.Close()
 		return
 	}
 	fmt.Printf("The server response is:\n %s\n\n", string(b))
@@ -62,7 +60,4 @@ func main() {
 	buf = nil
 	instr.GetAttribute(vi.ATTR_RSRC_CLASS, unsafe.Pointer(&buf[0]))
 	fmt.Printf(" Resource Class:  %s\n", string(buf))
-
-	instr.Close()
-	rm.Close()
 }

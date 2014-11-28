@@ -37,6 +37,7 @@ func main() {
 		fmt.Println("Could not open a session to the VISA Resource Manager!")
 		os.Exit(0)
 	}
+	defer rm.Close()
 
 	// Find all the VISA resources in our system and store the number of resources
 	// in the system in numInstrs.  Notice the different query descriptions a
@@ -101,6 +102,5 @@ func main() {
 		}
 	}
 
-	status = vi.Close(findList)
-	status = rm.Close()
+	vi.Close(findList)
 }

@@ -58,6 +58,7 @@ func main() {
 		fmt.Println("Could not open a session to the VISA Resource Manager!")
 		return
 	}
+	defer rm.Close()
 
 	// Next we use the resource manager handle to open a session to a
 	// GPIB instrument at device 2.  A handle to this session is
@@ -68,6 +69,7 @@ func main() {
 		fmt.Println("An error occurred opening the session to GPIB::2::INSTR")
 		return
 	}
+	defer instr.Close()
 
 	// Now we install the handler for asynchronous i/o completion events.
 	// To install the handler, we must pass our instrument session, the type of
@@ -92,7 +94,7 @@ func main() {
 	// The command listed below is device specific. You may have to change
 	// command to accommodate your instrument.
 	b := []byte("SOUR:FUNC SIN; SENS: DATA?\n")
-	rdCount, _ = instr.Write(b, uint32(len(b)))
+	instr.Write(b, uint32(len(b)))
 
 	// Next the asynchronous read command is called to read back the
 	// date from the instrument.  Immediately after this is called
@@ -113,17 +115,11 @@ func main() {
 	// asynchronous job.
 	if stopflag == vi.TRUE {
 		// rdCount was set in the callback
-		fmt.Printf("Count: %d data:  %s", rdCount, string(buf)
+		fmt.Printf("Count: %d data:  %s", rdCount, string(buf))
 	} else {
 		instr.Terminate(vi.NULL, uint16(job))
 		fmt.Println("The asynchronous read did not complete.")
 	}
 
-	fmt.Printf("\nHit enter to continue.")
-	fmt.Scanf("%c", &resp)
-
-	// Now we close the instrument session and the resource manager
-	// session to free up resources.
-	instr.Close()
-	rm.Close()
+	fmt.Printf("Exiting...")
 }
