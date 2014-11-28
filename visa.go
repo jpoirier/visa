@@ -32,7 +32,6 @@
 package visa
 
 /*
-#define __amd64
 #if defined(__amd64) || defined(__amd64__) || defined(__x86_64) || defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 #cgo linux LDFLAGS: -lvisa64
 #cgo darwin LDFLAGS: -framework VISA
