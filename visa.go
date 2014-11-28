@@ -101,7 +101,7 @@ func (rm Session) FindRsrc(expr string) (findList, retCnt uint32, desc string, s
 }
 
 // FindNext gets the next resource from the list of resources found during a
-// previous call to viFindRsrc.
+// previous call to FindRsrc.
 func FindNext(findList uint32) (string, Status) {
 	d := make([]byte, 257)
 	status := Status(C.viFindNext((C.ViFindList)(findList),
@@ -160,9 +160,14 @@ func (rm Session) Close() Status {
 	return Status(C.viClose((C.ViObject)(rm)))
 }
 
-// Close Closes the specified event, or find list.
+// Close Closes the specified instrument, or find list.
 func (instr Object) Close() Status {
 	return Status(C.viClose((C.ViObject)(instr)))
+}
+
+// Close Closes the specified find list.
+func Close(list uint32) Status {
+	return Status(C.viClose((C.ViObject)(list)))
 }
 
 // SetAttribute Sets the state of an attribute.
