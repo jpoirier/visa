@@ -172,14 +172,15 @@ func (instr Object) SetAttribute(attribute, attrState uint32) Status {
 }
 
 // GetAttribute Retrieves the state of an attribute.
-func (instr Object) GetAttribute(attrName uint32, attrValue unsafe.Pointer) Status {
-	return Status(C.viGetAttribute((C.ViObject)(instr),
+func (instr Object) GetAttribute(attrName uint32) ([]byte, Status) {
+	attrValue := make([]byte, 257)
+	status := Status(C.viGetAttribute((C.ViObject)(instr),
 		(C.ViAttr)(attrName),
-		attrValue))
+		unsafe.Pointer(&attrValue[0])))
+	return attrValue, status
 }
 
-// StatusDesc Returns a user-readable description of the status code
-// passed to the operation.
+// StatusDesc Returns a user-readable description of the status code passed to the operation.
 func (instr Object) StatusDesc(status_in Status) (string, Status) {
 	d := make([]byte, 257)
 	status := Status(C.viStatusDesc((C.ViObject)(instr),
