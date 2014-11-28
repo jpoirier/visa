@@ -79,8 +79,6 @@ func main() {
 		return
 	}
 
-	instr.Write(b, uint32(len(b)))
-
 	// Now we will attempt to read back a response from the device to
 	// the identification query that was sent.  We will use the viRead
 	// function to acquire the data.  We will try to read back 100 bytes.
