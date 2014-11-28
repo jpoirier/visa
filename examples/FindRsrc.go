@@ -57,9 +57,9 @@ func main() {
 	findList, numInstrs, instrDescriptor, status := rm.FindRsrc("?*INSTR")
 	if status < vi.SUCCESS {
 		fmt.Println("An error occurred while finding resources.\n")
-		rm.Close()
 		return
 	}
+	defer vi.Close(findList)
 
 	fmt.Printf("%d instruments, serial ports, and other resources found:\n\n", numInstrs)
 	fmt.Printf("%s \n", instrDescriptor)
@@ -81,7 +81,6 @@ func main() {
 		if status < vi.SUCCESS {
 			// did we find the next resource? */
 			fmt.Println("An error occurred finding the next resource.")
-			rm.Close()
 			return
 		}
 		fmt.Printf("%s \n", instrDescriptor)
@@ -101,6 +100,4 @@ func main() {
 			break
 		}
 	}
-
-	vi.Close(findList)
 }
