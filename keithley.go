@@ -1,4 +1,5 @@
-// Keithley RF switch driver
+// Keithley RF Switch driver
+
 package keithley
 
 import (
