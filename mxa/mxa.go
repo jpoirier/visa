@@ -143,7 +143,7 @@ func (m *Mxa) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 	if err != nil {
 		return freqMhz, -1
 	}
-	freqMhz = t / 1000.0 / 1000.0
+	freqMhz = float32(t / 1000.0 / 1000.0)
 	return
 }
 
