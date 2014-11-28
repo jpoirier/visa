@@ -37,7 +37,7 @@ package visa
 #cgo darwin LDFLAGS: -framework VISA
 #cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa64
 #else
-#cgo linux LDFLAGS: -lvisa
+#cgo linux LDFLAGS: -L/usr/local/lib -lvisa
 #cgo darwin LDFLAGS: -framework VISA
 #cgo windows LDFLAGS: -LC:/WINDOWS/system32 -lvisa32
 #endif
