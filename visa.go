@@ -59,6 +59,11 @@ import "unsafe"
 
 var PackageVersion string = "v0.1"
 
+type Visa interface {
+	Read(cnt uint32) (buf []byte, retCnt uint32, status Status)
+	Write(buf []byte, cnt uint32) (retCnt uint32, status Status)
+}
+
 type Status int32
 type Session uint32
 type Object uint32
