@@ -13,7 +13,7 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"unsafe"
 
 	vi "github.com/jpoirier/visa"
 )
@@ -22,14 +22,14 @@ func main() {
 	rm, status := vi.OpenDefaultRM()
 	if status < vi.SUCCESS {
 		fmt.Println("Could not open a session to the VISA Resource Manager!")
-		os.Exit(0)
+		return
 	}
 
 	instr, status := rm.Open("TCPIP0::ftp.ni.com::21::SOCKET", vi.NULL, vi.NULL)
 	if status < vi.SUCCESS {
 		fmt.Println("An error occurred opening the session to TCPIP0::ftp.ni.com::21::SOCKET")
 		rm.Close()
-		os.Exit(0)
+		return
 	}
 
 	status = instr.SetAttribute(vi.ATTR_TCPIP_NODELAY, vi.TRUE)
@@ -37,26 +37,30 @@ func main() {
 		fmt.Println("An error occurred setting the attributes...")
 		instr.Close()
 		rm.Close()
-		os.Exit(0)
+		return
 	}
-	buf, _, status := instr.Read(25)
+	b, _, status := instr.Read(25)
 	if status < vi.SUCCESS {
 		fmt.Printf("Read failed with error code %x \n", status)
 		rm.Close()
-		os.Exit(0)
+		return
 	}
-	fmt.Printf("The server response is:\n %s\n\n", string(buf))
+	fmt.Printf("The server response is:\n %s\n\n", string(b))
 
-	buf, _ = instr.GetAttribute(vi.ATTR_TCPIP_ADDR)
+	buf := make([]byte, 100)
+	instr.GetAttribute(vi.ATTR_TCPIP_ADDR, unsafe.Pointer(&buf[0]))
 	fmt.Printf(" Address:  %s\n", string(buf))
 
-	buf, _ = instr.GetAttribute(vi.ATTR_TCPIP_HOSTNAME)
+	buf = nil
+	instr.GetAttribute(vi.ATTR_TCPIP_HOSTNAME, unsafe.Pointer(&buf[0]))
 	fmt.Printf(" Host Name:  %s\n", string(buf))
 
-	buf, _ = instr.GetAttribute(vi.ATTR_TCPIP_PORT)
+	buf = nil
+	instr.GetAttribute(vi.ATTR_TCPIP_PORT, unsafe.Pointer(&buf[0]))
 	fmt.Printf(" Port:  %s\n", string(buf))
 
-	buf, _ = instr.GetAttribute(vi.ATTR_RSRC_CLASS)
+	buf = nil
+	instr.GetAttribute(vi.ATTR_RSRC_CLASS, unsafe.Pointer(&buf[0]))
 	fmt.Printf(" Resource Class:  %s\n", string(buf))
 
 	instr.Close()

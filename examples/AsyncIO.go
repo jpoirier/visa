@@ -27,7 +27,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"unsafe"
 
 	vi "github.com/jpoirier/visa"
@@ -57,7 +56,7 @@ func main() {
 	rm, status := vi.OpenDefaultRM()
 	if status < vi.SUCCESS {
 		fmt.Println("Could not open a session to the VISA Resource Manager!")
-		os.Exit(0)
+		return
 	}
 
 	// Next we use the resource manager handle to open a session to a
@@ -67,7 +66,7 @@ func main() {
 	instr, status := rm.Open("GPIB::2::INSTR", vi.NULL, vi.NULL)
 	if status < vi.SUCCESS {
 		fmt.Println("An error occurred opening the session to GPIB::2::INSTR")
-		os.Exit(0)
+		return
 	}
 
 	// Now we install the handler for asynchronous i/o completion events.
@@ -114,7 +113,7 @@ func main() {
 	// asynchronous job.
 	if stopflag == vi.TRUE {
 		// rdCount was set in the callback
-		fmt.Printf("Count: %d data:  %s", rdCount, buf)
+		fmt.Printf("Count: %d data:  %s", rdCount, string(buf)
 	} else {
 		instr.Terminate(vi.NULL, uint16(job))
 		fmt.Println("The asynchronous read did not complete.")

@@ -18,3 +18,7 @@ to cross compile
 for compile checks I created a stubbed 64-bit version of libvisa.so
 
 https://code.google.com/p/go-wiki/wiki/cgo
+
+Notes to me:
+- saved /usr/local/lib/libvisa.so to /usr/local/lib/libvisa.so.orig
+- moved my lib stubs to /usr/local/lib/
