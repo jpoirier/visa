@@ -139,7 +139,7 @@ func (m *Mxa) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 	if status < vi.SUCCESS && retCount > 0 {
 		return
 	}
-	t, err := strconv.ParseFloat(buffer, 32)
+	t, err := strconv.ParseFloat(string(buffer), 32)
 	if err != nil {
 		return freqMhz, -1
 	}
