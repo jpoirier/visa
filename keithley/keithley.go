@@ -90,7 +90,7 @@ func (d *Driver) CloseChan(ch uint32) (status vi.Status) {
 }
 
 // ClosedChanList Returns a list of closed channels.
-func (d *Driver) ClosedChanList(ch uint32) (list string, status vi.Status) {
+func (d *Driver) ClosedChanList() (list string, status vi.Status) {
 	// Returns list of closed channels.
 	// RF Switch returns format '(@1,2,3)'.
 	// If no channels closed, switch returns '(@)'.

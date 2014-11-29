@@ -15,6 +15,7 @@ package main
 import (
 	"fmt"
 
+	vi "github.com/jpoirier/visa"
 	ke "github.com/jpoirier/visa/keithley"
 )
 
@@ -29,7 +30,7 @@ func main() {
 	defer rm.Close()
 
 	//
-	instr, status = ke.OpenGpib(0, 2)
+	instr, status := ke.OpenGpib(rm, 0, 2, vi.NULL, vi.NULL)
 	if status < vi.SUCCESS {
 		fmt.Println("An error occurred opening the session to GPIB 0:2")
 		return
@@ -40,7 +41,7 @@ func main() {
 	instr.OpenAllChans()
 	instr.OpenChan(1)
 	instr.CloseChan(1)
-	list, _ instr.ClosedChanList()
+	list, _ := instr.ClosedChanList()
 	fmt.Println("Closed channel list: ", list)
 	fmt.Println("Closing Sessions...")
 }
