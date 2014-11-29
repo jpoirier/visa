@@ -708,10 +708,10 @@ func (instr Object) Poke32(address unsafe.Pointer, val uint32) {
 // 	return val
 // }
 
-// Poke64 Writes an 64-bit value to the specified address.
-// func (instr Object) Poke64(address unsafe.Pointer, val uint64) {
-// 	C.viPoke64((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt64)(val))
-// }
+Poke64 Writes an 64-bit value to the specified address.
+func (instr Object) Poke64(address unsafe.Pointer, val uint64) {
+	C.viPoke64((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt64)(val))
+}
 
 // ------------------------
 // Shared Memory Operations
