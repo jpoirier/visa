@@ -20,7 +20,7 @@ func OpenGpib(rm vi.Session, ctrl, addr, mode, timeout uint32) (*Driver, vi.Stat
 	name := fmt.Sprintf("GPIB%d::%d", ctrl, addr)
 	instr, status := rm.Open(name, mode, timeout)
 	if status < vi.SUCCESS {
-		fmt.Println("Error, OpenGpib failed with error: ", vi.StatusDesc(status))
+		fmt.Println("Error, OpenGpib failed with error: ", status)
 		os.Exit(0)
 	}
 	return &Driver{instr}, status
@@ -35,7 +35,7 @@ func OpenTcp(rm vi.Session, ip string, mode, timeout uint32) (*Driver, vi.Status
 	name := fmt.Sprintf("TCPIP::%s::INSTR", ip)
 	instr, status := rm.Open(name, mode, timeout)
 	if status < vi.SUCCESS {
-		fmt.Println("Error, OpenGpib failed with error: ", vi.StatusDesc(status))
+		fmt.Println("Error, OpenGpib failed with error: ", status)
 		os.Exit(0)
 	}
 	return &Driver{instr}, status

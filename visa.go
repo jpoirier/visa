@@ -188,7 +188,7 @@ func (instr Object) GetAttribute(attrName uint32, addr unsafe.Pointer) Status {
 }
 
 // StatusDesc Returns a user-readable description of the status code passed to the operation.
-func StatusDesc(status_in Status) (string, Status) {
+func (instr Object) StatusDesc(status_in Status) (string, Status) {
 	d := make([]byte, 257)
 	status := Status(C.viStatusDesc((C.ViObject)(instr),
 		(C.ViStatus)(status_in),
