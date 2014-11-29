@@ -29,6 +29,8 @@
 // - Shared Memory Operations
 // - Interface Specific Operations
 
+// mingw-gcc doesn't like _MSC_VER
+
 package visa
 
 /*
@@ -44,7 +46,7 @@ package visa
 
 #cgo linux CFLAGS:
 #cgo darwin CFLAGS:
-#cgo windows CFLAGS: -I. -D_MSC_VER=1200
+#cgo windows CFLAGS: -I.
 
 #include <stdlib.h>
 #include <visa.h>
