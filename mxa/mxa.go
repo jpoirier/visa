@@ -326,7 +326,7 @@ func (d *Driver) SetMarkerOff(marker uint32) (status vi.Status) {
 
 // SetAllMarkersOff Sets all markers off.
 func (d *Driver) SetAllMarkersOff() (status vi.Status) {
-	b := []byte]("CALC:MARK:AOFF")
+	b := []byte("CALC:MARK:AOFF")
 	_, status = d.Write(b, uint32(len(b)))
 	return
 }
@@ -407,28 +407,28 @@ func (d *Driver) SetMarkerContPeak(marker uint32) (status vi.Status) {
 
 // SetMarkerTableOn Sets the market table display off.
 func (d *Driver) SetMarkerTableOn() (status vi.Status) {
-	b := []byte]("CALC:MARK:TABL ON")
+	b := []byte("CALC:MARK:TABL ON")
 	_, status = d.Write(b, uint32(len(b)))
 	return
 }
 
 // SetMarkerTableOff Sets the market table display off.
 func (d *Driver) SetMarkerTableOff() (status vi.Status) {
-	b := []byte]("CALC:MARK:TABL OFF")
+	b := []byte("CALC:MARK:TABL OFF")
 	_, status = d.Write(b, uint32(len(b)))
 	return
 }
 
 // SetPeakTableOn Sets the peak table display on.
 func (d *Driver) SetMarkerTableOn() (status vi.Status) {
-	b := []byte]("CALC:MARK:PEAK:TABL:STATE ON")
+	b := []byte("CALC:MARK:PEAK:TABL:STATE ON")
 	_, status = d.Write(b, uint32(len(b)))
 	return
 }
 
 // SetPeakTableOff Sets the peak table display to off.
 func (d *Driver) SetMarkerTableOff() (status vi.Status) {
-	b := []byte]("CALC:MARK:PEAK:TABL:STATE OFF")
+	b := []byte("CALC:MARK:PEAK:TABL:STATE OFF")
 	_, status = d.Write(b, uint32(len(b)))
 	return
 }
@@ -479,7 +479,7 @@ func (d *Driver) ShowLTE_ACP() (status vi.Status) {
 
 // ShowSpectrumAnalyzer Sets spectrum analyzer mode on.
 func (d *Driver) ShowSpectrumAnalyzer() (status vi.Status) {
-	b := []byte]("INST SA")
+	b := []byte("INST SA")
 	_, status = d.Write(b, uint32(len(b)))
 	return
 }
