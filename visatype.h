@@ -55,35 +55,33 @@
 #define _VI_PTR             _VI_FAR *
 
 /*- VISA Types --------------------------------------------------------------*/
-//typedef unsigned   __int64  ViUInt64;
-//typedef _VI_SIGNED __int64  ViInt64;
-#define _VI_INT64_UINT64_DEFINED
+
 #ifndef _VI_INT64_UINT64_DEFINED
-	#if defined(_WIN64) || ((defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)) && !defined(_NI_mswin16_))
-		#if (defined(_MSC_VER) && (_MSC_VER >= 1200)) || (defined(_CVI_) && (_CVI_ >= 700)) || (defined(__BORLANDC__) && (__BORLANDC__ >= 0x0520)) || defined(__LCC__)
-			typedef unsigned   __int64  ViUInt64;
-			typedef _VI_SIGNED __int64  ViInt64;
-			#define _VI_INT64_UINT64_DEFINED
-			#if defined(_WIN64)
-				#define _VISA_ENV_IS_64_BIT
-			#else
-				/* This is a 32-bit OS, not a 64-bit OS */
-			#endif
-		#endif
-	#elif defined(__GNUC__) && (__GNUC__ >= 3)
-		#include <limits.h>
-		#include <sys/types.h>
-		typedef u_int64_t           ViUInt64;
-		typedef int64_t             ViInt64;
-		#define _VI_INT64_UINT64_DEFINED
-		#if defined(LONG_MAX) && (LONG_MAX > 0x7FFFFFFFL)
-			#define _VISA_ENV_IS_64_BIT
-		#else
-			/* This is a 32-bit OS, not a 64-bit OS */
-		#endif
-	#else
-		/* This platform does not support 64-bit types */
-	#endif
+#if defined(_WIN64) || ((defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)) && !defined(_NI_mswin16_))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1200)) || (defined(_CVI_) && (_CVI_ >= 700)) || (defined(__BORLANDC__) && (__BORLANDC__ >= 0x0520)) || defined(__LCC__)
+typedef unsigned   __int64  ViUInt64;
+typedef _VI_SIGNED __int64  ViInt64;
+#define _VI_INT64_UINT64_DEFINED
+#if defined(_WIN64)
+#define _VISA_ENV_IS_64_BIT
+#else
+/* This is a 32-bit OS, not a 64-bit OS */
+#endif
+#endif
+#elif defined(__GNUC__) && (__GNUC__ >= 3)
+#include <limits.h>
+#include <sys/types.h>
+typedef u_int64_t           ViUInt64;
+typedef int64_t             ViInt64;
+#define _VI_INT64_UINT64_DEFINED
+#if defined(LONG_MAX) && (LONG_MAX > 0x7FFFFFFFL)
+#define _VISA_ENV_IS_64_BIT
+#else
+/* This is a 32-bit OS, not a 64-bit OS */
+#endif
+#else
+/* This platform does not support 64-bit types */
+#endif
 #endif
 
 #if defined(_VI_INT64_UINT64_DEFINED)
