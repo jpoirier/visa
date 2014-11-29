@@ -53,7 +53,7 @@ func OpenTcp(rm vi.Session, ip string, mode, timeout uint32) (*Driver, vi.Status
 // Reset Resets the switch unit.
 func (d *Driver) Reset() (status vi.Status) {
 	b := []byte("*RST")
-	_, status = c.Write(b, uint32(len(b)))
+	_, status = d.Write(b, uint32(len(b)))
 	return
 }
 
