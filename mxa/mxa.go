@@ -1,4 +1,4 @@
-// MXA Spectrum Analyzer driver
+// MXA Spectrum Analyzer Driver
 
 package mxa
 
@@ -12,7 +12,7 @@ import (
 )
 
 type Driver struct {
-	vi.Visa
+	vi.Driver
 }
 
 // OpenGpib Opens a session to the specified resource.
@@ -405,7 +405,7 @@ func (d *Driver) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 
 //   def saveMarkerTable(self, strFilename):
 //     """
-//       Saves Marker Table to MXA drive.
+//       Saves Marker Table to Driver drive.
 //       Always activates marker table view first.
 //     """
 //     self.setMarkerTable_On()
