@@ -1,4 +1,4 @@
-// MXA Spectrum Analyzer Driver
+// Agilent MXA Spectrum Analyzer Driver
 
 package mxa
 
@@ -41,13 +41,14 @@ func OpenTcp(rm vi.Session, ip string, mode, timeout uint32) (*Driver, vi.Status
 	return &Driver{instr}, status
 }
 
-// SetScreenTitle
+// SetScreenTitle Sets screen title.
 func (d *Driver) SetScreenTitle(title string) (status vi.Status) {
 	b := fmt.Sprintf("DISP:ANN:TITL:DATA '%s'", title)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
+// SaveScreenShot Saves name screenshot.
 func (d *Driver) SaveScreenShot(name string) (status vi.Status) {
 	b := fmt.Sprintf("MMEM:STOR:SCR '%s'", name)
 	_, status = d.Write([]byte(b), uint32(len(b)))
@@ -92,7 +93,7 @@ func (d *Driver) CreateFolder(name string) (status vi.Status) {
 	return
 }
 
-// SetTraceType Sets trace number to trace type.
+// SetTraceType Sets trace number to trace stype.
 func (d *Driver) SetTraceType(number int, stype string) (status vi.Status) {
 	stype = strings.ToUpper(stype)
 	var b string
@@ -112,50 +113,50 @@ func (d *Driver) SetTraceType(number int, stype string) (status vi.Status) {
 	return
 }
 
-// SetTraceClearWrite Sets trace number to Clear Write.
-func (d *Driver) SetTraceClearWrite(number int) (status vi.Status) {
-	b := fmt.Sprintf("TRAC%d:TYPE WRITE", number)
+// SetTraceClearWrite Sets number trace to clear write.
+func (d *Driver) SetTraceClearWrite(trace uint32) (status vi.Status) {
+	b := fmt.Sprintf("TRAC%d:TYPE WRITE", trace)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
-// ClearTrace Clears/Resets trace number.
-func (d *Driver) ClearTrace(number int) (status vi.Status) {
-	b := fmt.Sprintf("TRAC:CLEAR TRACE%d", number)
+// ClearTrace Clears/Resets number trace.
+func (d *Driver) ClearTrace(trace uint32) (status vi.Status) {
+	b := fmt.Sprintf("TRAC:CLEAR TRACE%d", trace)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // ClearAllTraces Clears/Resets all traces.
-func (d *Driver) ClearAllTraces(number int) (status vi.Status) {
+func (d *Driver) ClearAllTraces() (status vi.Status) {
 	b := []byte("TRAC:CLEAR:ALL")
 	_, status = d.Write(b, uint32(len(b)))
 	return
 }
 
-// SetCenterFreqKHz Sets the center crequency freqKhz.
-func (d *Driver) SetCenterFreqKHz(freqKhz float32) (status vi.Status) {
-	b := fmt.Sprintf("FREQ:CENT %f KHZ", freqKhz)
+// SetCenterFreqKHz Sets the center crequency mhz.
+func (d *Driver) SetCenterFreqKHz(mhz float32) (status vi.Status) {
+	b := fmt.Sprintf("FREQ:CENT %f KHZ", mhz)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
-// SetCenterFreqMHz Sets the center crequency freqMhz.
-func (d *Driver) SetCenterFreqMHz(freqMhz float32) (status vi.Status) {
-	b := fmt.Sprintf("FREQ:CENT %f MHZ", freqMhz)
+// SetCenterFreqMHz Sets the center crequency mhz.
+func (d *Driver) SetCenterFreqMHz(mhz float32) (status vi.Status) {
+	b := fmt.Sprintf("FREQ:CENT %f MHZ", mhz)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
-// SetCenterFreqGHz Sets the center crequency freqGhz.
-func (d *Driver) SetCenterFreqGHz(freqGhz float32) (status vi.Status) {
-	b := fmt.Sprintf("FREQ:CENT %f GHZ", freqGhz)
+// SetCenterFreqGHz Sets the center crequency ghz.
+func (d *Driver) SetCenterFreqGHz(ghz float32) (status vi.Status) {
+	b := fmt.Sprintf("FREQ:CENT %f GHZ", ghz)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
-// GetCenterFreqMHz returns the center frequency (MHz).
-func (d *Driver) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
+// GetCenterFreqMHz returns the center frequency mhz).
+func (d *Driver) GetCenterFreqMHz() (mhz float32, status vi.Status) {
 	b := []byte("FREQ:CENT?")
 	_, status = d.Write(b, uint32(len(b)))
 	if status < vi.SUCCESS {
@@ -167,9 +168,9 @@ func (d *Driver) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 	}
 	t, err := strconv.ParseFloat(string(buffer), 32)
 	if err != nil {
-		return freqMhz, -1
+		return mhz, -1
 	}
-	freqMhz = float32(t / 1000.0 / 1000.0)
+	mhz = float32(t / 1000.0 / 1000.0)
 	return
 }
 
@@ -217,26 +218,34 @@ func (d *Driver) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 //     elif mode.upper() == "FIXED":
 //         self.write("CALC:MARK%d:MODE FIX" % (marker_num) )
 
-//   def setMarkerMode_Normal(self, marker_num):
-//     """
-//       Activates the specified marker in Normal mode.
-//     """
-//     self.write("CALC:MARK%d:MODE POS" % (marker_num) )
+// SetMarkerModeNorm Puts the specified marker in normal mode.
+func (d *Driver) SetMarkerModeNorm(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:MODE POS", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerMode_Delta(self, marker_num, relative_marker_num):
-//     """
-//       Activates the specified marker in Delta mode.
-//       Sets the "Relative To" marker property.
-//       Note: If relative marker is previously OFF, it will be enabled in Fixed mode at the same location as marker_num.
-//     """
-//     self.write("CALC:MARK%d:MODE DELT" % (marker_num) )
-//     self.write("CALC:MARK%d:REF %d" % (marker_num, relative_marker_num) )
+// SetMarkerModeDelta Activates marker in Delta mode and sets relMarker
+// property.  Note, if relative marker was OFF, it's enabled in Fixed mode
+// at the same location as marker.
+func (d *Driver) SetMarkerModeDelta(marker, relMarker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:MODE DELT", marker)
 
-//   def setMarkerMode_Fixed(self, marker_num):
-//     """
-//       Activates the specified marker in Fixed mode.
-//     """
-//     self.write("CALC:MARK%d:MODE FIX" % (marker_num) )
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	if status < vi.SUCCESS {
+		return
+	}
+	b = fmt.Sprintf("CALC:MARK%d:REF %d", relMarker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
+
+// SetMarkerModeFixed Puts the specified marker in fixed mode.
+func (d *Driver) SetMarkerModeFixed(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:MODE FIX", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
 //   def setMarkerFunction(self, marker_num = 1, fxn = "BAND_POWER"):
 //     """
@@ -252,71 +261,82 @@ func (d *Driver) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 //     elif fxn.upper() == "OFF":
 //         self.write("CALC:MARK%d:FUNC OFF" % (marker_num) )
 
-//   def setMarkerFunction_Noise(self, marker_num):
-//     """
-//       Sets the Marker Function to Marker Noise for the specified marker.
-//     """
-//     self.write("CALC:MARK%d:FUNC NOISE" % (marker_num) )
+// SetMarkerFuncNoise Sets marker function to noise.
+func (d *Driver) SetMarkerFuncNoise(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:FUNC NOISE", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerFunction_BandPower(self, marker_num):
-//     """
-//       Sets the Marker Function to Band/Interval Power for the specified marker.
-//     """
-//     self.write("CALC:MARK%d:FUNC BPOW" % (marker_num) )
+// SetMarkerFuncBandPower Sets marker function to band/interval power.
+func (d *Driver) SetMarkerFuncBandPower(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:FUNC BPOW", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerFunction_BandDensity(self, marker_num):
-//     """
-//       Sets the Marker Function to Band/Interval Density for the specified marker.
-//     """
-//     self.write("CALC:MARK%d:FUNC BDEN" % (marker_num) )
+// SetMarkerFuncBandDensity Sets marker band/interval density.
+func (d *Driver) SetMarkerFuncBandDensity(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:FUNC BDEN", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerTraceNum(self, marker_num, trace_num):
-//     """
-//       Sets the Marker Trace Number for the specified marker.
-//     """
-//     self.write("CALC:MARK%d:TRAC %d" % (marker_num, trace_num) )
+// SetMarkerTraceNum Sets marker trace number.
+func (d *Driver) SetMarkerTraceNum(marker, number uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:TRAC %d", marker, number)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerLines_On(self, marker_num):
-//     """
-//       Sets the Lines ON for the specified marker.
-//     """
-//     self.write("CALC:MARK%d:LINES ON" % (marker_num) )
+// SetMarkerLinesOn Sets marker lines on.
+func (d *Driver) SetMarkerLinesOn(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:LINES ON", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerLines_Off(self, marker_num):
-//     """
-//       Sets the Lines OFF for the specified marker.
-//     """
-//     self.write("CALC:MARK%d:LINES OFF" % (marker_num) )
+// SetMarkerLinesOff Sets marker lines off.
+func (d *Driver) SetMarkerLinesOff(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:LINES OFF", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerFunction_Off(self, marker_num):
-//     """
-//       Sets the Marker Function to Off for the specified marker.
-//     """
-//     self.write("CALC:MARK%d:FUNC OFF" % (marker_num) )
+// SetMarkerFuncOff Sets marker function off.
+func (d *Driver) SetMarkerFuncOff(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:FUNC OFF", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerFunction_BandSpan_MHz(self, marker_num, span):
-//     """
-//       Sets the Marker Function to Band Adjust Span for the specified marker.
-//     """
-//     self.write("CALC:MARK%d:FUNC:BAND:SPAN %f MHZ" % (marker_num, span) )
+// SetMarkerFuncBandSpanMHz Sets marker to band adjust span mhz.
+func (d *Driver) SetMarkerFuncBandSpanMHz(marker, mhz uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:FUNC:BAND:SPAN %f MHZ", marker, mhz)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerMode_Off(self, marker_num):
-//     """
-//       Sets specified marker OFF.
-//     """
-//     self.write("CALC:MARK%d:MODE OFF" % (marker_num) )
+// SetMarkerOff Sets marker off.
+func (d *Driver) SetMarkerOff(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:MODE OFF", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setAllMarkers_Off(self):
-//     """
-//       Sets specified marker OFF.
-//     """
-//     self.write("CALC:MARK:AOFF")
+// SetAllMarkersOff Sets all markers off.
+func (d *Driver) SetAllMarkersOff() (status vi.Status) {
+	b := []byte]("CALC:MARK:AOFF")
+	_, status = d.Write(b, uint32(len(b)))
+	return
+}
 
-//   def setMarker_X_Value_MHz(self, marker_num, x_value):
-//     """
-//       Sets the X-Axis value for the specified marker in MHz
-//     """
-//     self.write("CALC:MARK%d:X %f MHZ" % (marker_num, x_value) )
+// SetMarkerXValMHz Sets marker X-Axis value to mhz.
+func (d *Driver) SetMarkerXValMHz(marker, mhz uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:X %f MHZ", marker, mhz)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
 //   def getMarker_X_Value_MHz(self, marker_num):
 //     """
@@ -325,13 +345,13 @@ func (d *Driver) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 //     """
 //     return float(self.read("CALC:MARK%d:X?" % (marker_num) ) ) / 1000.0 / 1000.0
 
-//   def setMarker_Y_Value(self, marker_num, y_value):
-//     """
-//       Sets the Y-Axis value for the specified marker.
-//       Units are assumed to be dBm.
-//       Note: Can only set Y Value for Fixed type marker.
-//     """
-//     self.write("CALC:MARK%d:Y %f" % (marker_num, y_value) )
+// SetMarkerYValDbm Sets marker Y-Axis value to dbm.
+// Note, fixed type marker only.
+func (d *Driver) SetMarkerYValDbm(marker uint32, dbm float32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:Y %f", marker, dbm)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
 //   def getMarker_Y_Value(self, marker_num):
 //     """
@@ -340,122 +360,141 @@ func (d *Driver) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 //     """
 //     return float(self.read("CALC:MARK%d:Y?" % (marker_num) ) )
 
-//   def setMarkerPeakSearch(self, marker_num):
-//     """
-//       Sets the specified marker to the Peak (max) level.
-//     """
-//     self.write("CALC:MARK%d:MAX" % (marker_num) )
+// SetMarkerPeakSearch Sets marker peak (max) search level on.
+func (d *Driver) SetMarkerPeakSearch(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:MAX", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerNextPeak(self, marker_num):
-//     """
-//       Sets the specified marker to the Next Peak
-//       If Peak Search has not been performed, this will be the same as Peak Search.
-//     """
-//     self.write("CALC:MARK%d:MAX:NEXT" % (marker_num) )
+// SetMarkerNextPeak Sets marker next peak on.
+// Note, peak search performed if not done previously.
+func (d *Driver) SetMarkerNextPeak(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:MAX:NEXT", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerNextPeak_Right(self, marker_num):
-//     """
-//       Sets the specified marker to the Next Peak Right.
-//       If Peak Search has not been performed, this will be the same as Peak Search.
-//     """
-//     self.write("CALC:MARK%d:MAX:RIGHT" % (marker_num) )
+// SetMarkerNextPeakR Sets marker next right peak on.
+// Note, peak search performed if not done previously.
+func (d *Driver) SetMarkerNextPeakR(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:MAX:RIGHT", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerNextPeak_Left(self, marker_num):
-//     """
-//       Sets the specified marker to the Next Peak Left.
-//       If Peak Search has not been performed, this will be the same as Peak Search.
-//     """
-//     self.write("CALC:MARK%d:MAX:LEFT" % (marker_num) )
+// SetMarkerNextPeakL Sets marker next left peak on.
+// Note, peak search performed if not done previously.
+func (d *Driver) SetMarkerNextPeakL(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:MAX:LEFT", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerContinuousPeak_On(self, marker_num):
-//     """
-//       Sets the specified marker to Continuous Peak Search.
-//     """
-//     self.write("CALC:MARK%d:CPSEARCH: ON" % (marker_num) )
+// SetMarkerContPeak Sets marker continuous peak search on.
+func (d *Driver) SetMarkerContPeak(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:CPSEARCH: ON", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerContinuousPeak_Off(self, marker_num):
-//     """
-//       Disables Continuous Peak Search for specified marker.
-//     """
-//     self.write("CALC:MARK%d:CPSEARCH: OFF" % (marker_num) )
+// SetMarkerContPeakOff Sets marker continuous peak search off.
+func (d *Driver) SetMarkerContPeak(marker uint32) (status vi.Status) {
+	b := fmt.Sprintf("CALC:MARK%d:CPSEARCH: OFF", marker)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setMarkerTable_On(self):
-//     """
-//       Turns the Marker Table Display ON.
-//     """
-//     self.write("CALC:MARK:TABL ON")
+// SetMarkerTableOn Sets the market table display off.
+func (d *Driver) SetMarkerTableOn() (status vi.Status) {
+	b := []byte]("CALC:MARK:TABL ON")
+	_, status = d.Write(b, uint32(len(b)))
+	return
+}
 
-//   def setMarkerTable_Off(self):
-//     """
-//       Turns the Marker Table Display OFF.
-//     """
-//     self.write("CALC:MARK:TABL OFF")
+// SetMarkerTableOff Sets the market table display off.
+func (d *Driver) SetMarkerTableOff() (status vi.Status) {
+	b := []byte]("CALC:MARK:TABL OFF")
+	_, status = d.Write(b, uint32(len(b)))
+	return
+}
 
-//   def setPeakTable_On(self):
-//     """
-//       Turns the Peak Table Display ON.
-//     """
-//     self.write("CALC:MARK:PEAK:TABL:STATE ON")
+// SetPeakTableOn Sets the peak table display on.
+func (d *Driver) SetMarkerTableOn() (status vi.Status) {
+	b := []byte]("CALC:MARK:PEAK:TABL:STATE ON")
+	_, status = d.Write(b, uint32(len(b)))
+	return
+}
 
-//   def setPeakTable_Off(self):
-//     """
-//       Turns the Peak Table Display OFF.
-//     """
-//     self.write("CALC:MARK:PEAK:TABL:STATE OFF")
+// SetPeakTableOff Sets the peak table display to off.
+func (d *Driver) SetMarkerTableOff() (status vi.Status) {
+	b := []byte]("CALC:MARK:PEAK:TABL:STATE OFF")
+	_, status = d.Write(b, uint32(len(b)))
+	return
+}
 
-//   def saveMarkerTable(self, strFilename):
-//     """
-//       Saves Marker Table to Driver drive.
-//       Always activates marker table view first.
-//     """
-//     self.setMarkerTable_On()
-//     self.write("MMEM:STOR:RES:MTAB '%s'" % (strFilename) )
+// SaveMarkerTable Saves the marker table to filename.
+func (d *Driver) SaveMarkerTable(filename string) (status vi.Status) {
+	status = d.SetMarkerTableOn()
+	if status < vi.SUCCESS {
+		return
+	}
+	b := fmt.Sprintf("MMEM:STOR:RES:MTAB '%s'", filename)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def savePeakTable(self, strFilename):
-//     """
-//       Saves Peak Table to MXA drive.
-//       Always activates peak table view first.
-//     """
-//     self.setPeakTable_On()
-//     self.write("MMEM:STOR:RES:PTAB '%s'" % (strFilename) )
+// SavePeakTable Saves the peak table to filename.
+func (d *Driver) SavePeakTable(filename string) (status vi.Status) {
+	status = d.SetPeakTableOn()
+	if status < vi.SUCCESS {
+		return
+	}
+	b := fmt.Sprintf("MMEM:STOR:RES:PTAB '%s'", filename)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def saveSpectogram(self, strFilename):
-//     """
-//       Saves Spectogram.
-//     """
-//     self.write("MMEM:STOR:RES:SPEC '%s'" % (strFilename) )
+// SaveSpectogram Saves the spectogram to filename.
+func (d *Driver) SavePeakTable(filename string) (status vi.Status) {
+	b := fmt.Sprintf("MMEM:STOR:RES:SPEC '%s'", filename)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
+
+// ShowLTE_ACP Sets LTE mode and ACP measurement screen on.
+func (d *Driver) ShowLTE_ACP() (status vi.Status) {
+	b := []byte("INST LTE")
+	_, status = d.Write(b, uint32(len(b)))
+	if status < vi.SUCCESS {
+		return
+	}
+	b = []byte("CONF:ACP")
+	_, status = d.Write(b, uint32(len(b)))
+	return
+}
 
 //   # TBD - Resize Marker Table
 //   #       Does not seem possible via remote commands.
 
-//   def showLTE_ACP(self):
-//     """
-//       Sets MXA to LTE mode, ACP Measurement screen.
-//     """
-//     self.write("INST LTE")
-//     self.write("CONF:ACP")
+// ShowSpectrumAnalyzer Sets spectrum analyzer mode on.
+func (d *Driver) ShowSpectrumAnalyzer() (status vi.Status) {
+	b := []byte]("INST SA")
+	_, status = d.Write(b, uint32(len(b)))
+	return
+}
 
-//   def showSpectrumAnalyzer(self):
-//     """
-//       Sets MXA to Spectrum Analyzer mode.
-//     """
-//     self.write("INST SA")
+// SetRefLevel Sets the reference level to dbm.
+// Note, if too high then set to max allowed.
+func (d *Driver) SetRefLevel(dbm float32) (status vi.Status) {
+	b := fmt.Sprintf("DISP:WIND:TRAC:Y:RLEV %f DBM", dbm)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
 
-//   def setRefLevel(self, refLevel):
-//     """
-//       Sets Reference Level in dBm.
-//       Note: MXA will convert to max allowed if input is too high.
-//     """
-//     self.write("DISP:WIND:TRAC:Y:RLEV %f DBM" % (refLevel) )
-
-//   def setRefLevelOffset(self, refLevelOffset):
-//     """
-//       Sets Reference Level Offset in dB.
-//     """
-//     self.write("DISP:WIND:TRAC:Y:RLEV:OFFSET %f" % (refLevelOffset) )
-
-// if __name__ == "__main__":
-
-//   TestMXA = MXA(GPIB_Address = 18)
-
-//   print 'IDN: ' + TestMXA.GetID()
+// SetRefLevelOffset Sets reference level offset to dbm.
+func (d *Driver) SetRefLevelOffset(dbm float32) (status vi.Status) {
+	b := fmt.Sprintf("DISP:WIND:TRAC:Y:RLEV:OFFSET %f", dbm)
+	_, status = d.Write([]byte(b), uint32(len(b)))
+	return
+}
