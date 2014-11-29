@@ -420,14 +420,14 @@ func (d *Driver) SetMarkerTableOff() (status vi.Status) {
 }
 
 // SetPeakTableOn Sets the peak table display on.
-func (d *Driver) SetMarkerTableOn() (status vi.Status) {
+func (d *Driver) SetPeakTableOn() (status vi.Status) {
 	b := []byte("CALC:MARK:PEAK:TABL:STATE ON")
 	_, status = d.Write(b, uint32(len(b)))
 	return
 }
 
 // SetPeakTableOff Sets the peak table display to off.
-func (d *Driver) SetMarkerTableOff() (status vi.Status) {
+func (d *Driver) SetPeakTableOff() (status vi.Status) {
 	b := []byte("CALC:MARK:PEAK:TABL:STATE OFF")
 	_, status = d.Write(b, uint32(len(b)))
 	return
