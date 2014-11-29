@@ -10,7 +10,7 @@ import (
 )
 
 type Driver struct {
-	vi.Driver
+	visa.Driver
 }
 
 // keithley - works with Keithley S46 RF Switch.

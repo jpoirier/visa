@@ -12,7 +12,7 @@ import (
 )
 
 type Driver struct {
-	vi.Visa
+	visa.Visa
 }
 
 // OpenGpib Opens a session to the specified resource.
