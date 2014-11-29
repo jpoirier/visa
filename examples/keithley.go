@@ -2,12 +2,6 @@
 // Keithley S46 RF Switch example
 //
 //
-// The general flow of the code is
-//      Open Resource Manager
-//      Open VISA Session to an Instrument
-//      Write the Identification Query Using viWrite
-//      Try to Read a Response With viRead
-//      Close the VISA Session
 //
 
 package main
