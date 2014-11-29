@@ -59,7 +59,7 @@ import "unsafe"
 
 var PackageVersion string = "v0.1"
 
-type Visa interface {
+type Driver interface {
 	Read(cnt uint32) (buf []byte, retCnt uint32, status Status)
 	Write(buf []byte, cnt uint32) (retCnt uint32, status Status)
 }
@@ -372,7 +372,7 @@ func (instr Object) Clear() Status {
 
 // ViSetBuf Sets the size for the formatted I/O and/or low-level
 // I/O communication buffer(s).
-func (instr Object) ViSetBuf(mask uint16, size uint32) Status {
+func (instr Object) SetBuf(mask uint16, size uint32) Status {
 	return Status(C.viSetBuf((C.ViSession)(instr),
 		(C.ViUInt16)(mask),
 		(C.ViUInt32)(size)))
@@ -470,7 +470,7 @@ func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Statu
 // ---------------------
 
 // In8 Reads in an 8-bit value from the specified memory space and offset.
-func (instr Object) iIn8(space uint16, offset BusAddress) (val uint8, status Status) {
+func (instr Object) In8(space uint16, offset BusAddress) (val uint8, status Status) {
 	status = Status(C.viIn8((C.ViSession)(instr),
 		(C.ViUInt16)(space),
 		(C.ViBusAddress)(offset),

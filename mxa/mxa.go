@@ -1,30 +1,56 @@
-// MXA Spectrum Analzer driver
+// MXA Spectrum Analyzer driver
 
 package mxa
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	vi "github.com/jpoirier/visa"
 )
 
-type Mxa struct {
+type Driver struct {
 	vi.Visa
-	instr vi.Object
+}
+
+// OpenGpib Opens a session to the specified resource.
+func OpenGpib(rm vi.Session, ctrl, addr, mode, timeout uint32) (*Driver, vi.Status) {
+	name := fmt.Sprintf("GPIB%d::%d", ctrl, addr)
+	instr, status := rm.Open(name, mode, timeout)
+	if status < vi.SUCCESS {
+		fmt.Println("Error, OpenGpib failed with error: ", vi.StatusDesc(status))
+		os.Exit(0)
+	}
+	return &Driver{instr}, status
+}
+
+// OpenTcp Opens a session to the specified resource.
+func OpenTcp(rm vi.Session, ip string, mode, timeout uint32) (*Driver, vi.Status) {
+	if len(ip) == 0 {
+		fmt.Println("Error, empty ip address string.")
+		os.Exit(0)
+	}
+	name := fmt.Sprintf("TCPIP::%s::INSTR", ip)
+	instr, status := rm.Open(name, mode, timeout)
+	if status < vi.SUCCESS {
+		fmt.Println("Error, OpenGpib failed with error: ", vi.StatusDesc(status))
+		os.Exit(0)
+	}
+	return &Driver{instr}, status
 }
 
 // SetScreenTitle
-func (m *Mxa) SetScreenTitle(title string) (status vi.Status) {
+func (d *Driver) SetScreenTitle(title string) (status vi.Status) {
 	b := fmt.Sprintf("DISP:ANN:TITL:DATA '%s'", title)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
-func (m *Mxa) SaveScreenShot(name string) (status vi.Status) {
+func (d *Driver) SaveScreenShot(name string) (status vi.Status) {
 	b := fmt.Sprintf("MMEM:STOR:SCR '%s'", name)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
@@ -53,21 +79,21 @@ func (m *Mxa) SaveScreenShot(name string) (status vi.Status) {
 //       outfile.close
 
 // DeleteFile Deletes file name; name must include the full path.
-func (m *Mxa) DeleteFile(name string) (status vi.Status) {
+func (d *Driver) DeleteFile(name string) (status vi.Status) {
 	b := fmt.Sprintf("MMEM:DEL '%s'", name)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // CreateFolder Creates folder name; name must include the full path.
-func (m *Mxa) CreateFolder(name string) (status vi.Status) {
+func (d *Driver) CreateFolder(name string) (status vi.Status) {
 	b := fmt.Sprintf("MMEM:MDIR '%s'", name)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // SetTraceType Sets trace number to trace type.
-func (m *Mxa) SetTraceType(number int, stype string) (status vi.Status) {
+func (d *Driver) SetTraceType(number int, stype string) (status vi.Status) {
 	stype = strings.ToUpper(stype)
 	var b string
 	switch stype {
@@ -82,60 +108,60 @@ func (m *Mxa) SetTraceType(number int, stype string) (status vi.Status) {
 	case "MIN", "MINH", "MINHOLD":
 		b = fmt.Sprintf("TRAC%d:TYPE MINHOLD", number)
 	}
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // SetTraceClearWrite Sets trace number to Clear Write.
-func (m *Mxa) SetTraceClearWrite(number int) (status vi.Status) {
+func (d *Driver) SetTraceClearWrite(number int) (status vi.Status) {
 	b := fmt.Sprintf("TRAC%d:TYPE WRITE", number)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // ClearTrace Clears/Resets trace number.
-func (m *Mxa) ClearTrace(number int) (status vi.Status) {
+func (d *Driver) ClearTrace(number int) (status vi.Status) {
 	b := fmt.Sprintf("TRAC:CLEAR TRACE%d", number)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // ClearAllTraces Clears/Resets all traces.
-func (m *Mxa) ClearAllTraces(number int) (status vi.Status) {
+func (d *Driver) ClearAllTraces(number int) (status vi.Status) {
 	b := []byte("TRAC:CLEAR:ALL")
-	_, status = m.instr.Write(b, uint32(len(b)))
+	_, status = d.Write(b, uint32(len(b)))
 	return
 }
 
 // SetCenterFreqKHz Sets the center crequency freqKhz.
-func (m *Mxa) SetCenterFreqKHz(freqKhz float32) (status vi.Status) {
+func (d *Driver) SetCenterFreqKHz(freqKhz float32) (status vi.Status) {
 	b := fmt.Sprintf("FREQ:CENT %f KHZ", freqKhz)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // SetCenterFreqMHz Sets the center crequency freqMhz.
-func (m *Mxa) SetCenterFreqMHz(freqMhz float32) (status vi.Status) {
+func (d *Driver) SetCenterFreqMHz(freqMhz float32) (status vi.Status) {
 	b := fmt.Sprintf("FREQ:CENT %f MHZ", freqMhz)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // SetCenterFreqGHz Sets the center crequency freqGhz.
-func (m *Mxa) SetCenterFreqGHz(freqGhz float32) (status vi.Status) {
+func (d *Driver) SetCenterFreqGHz(freqGhz float32) (status vi.Status) {
 	b := fmt.Sprintf("FREQ:CENT %f GHZ", freqGhz)
-	_, status = m.instr.Write([]byte(b), uint32(len(b)))
+	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // GetCenterFreqMHz returns the center frequency (MHz).
-func (m *Mxa) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
+func (d *Driver) GetCenterFreqMHz() (freqMhz float32, status vi.Status) {
 	b := []byte("FREQ:CENT?")
-	_, status = m.instr.Write(b, uint32(len(b)))
+	_, status = d.Write(b, uint32(len(b)))
 	if status < vi.SUCCESS {
 		return
 	}
-	buffer, retCount, status := m.instr.Read(50)
+	buffer, retCount, status := d.Read(50)
 	if status < vi.SUCCESS && retCount > 0 {
 		return
 	}
