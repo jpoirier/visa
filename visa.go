@@ -38,12 +38,12 @@ package visa
 #cgo linux CFLAGS: -I.
 #cgo darwin CFLAGS:
 #cgo windows CFLAGS: -I.
-#cgo and64 linux LDFLAGS: -L/usr/local/lib -lvisa64
-#cgo and64 darwin LDFLAGS: -framework VISA
-#cgo and64 windows LDFLAGS: -L. -lvisa64
-#cgo 386 linux LDFLAGS: -L/usr/local/lib -lvisa
-#cgo 386 darwin LDFLAGS: -framework VISA
-#cgo 386 windows LDFLAGS: -L. -lvisa32
+#cgo linux LDFLAGS: -L/usr/local/lib -lvisa64
+#cgo darwin LDFLAGS: -framework VISA
+#cgo windows LDFLAGS: -L. -lvisa64
+//#cgo linux LDFLAGS: -L/usr/local/lib -lvisa
+//#cgo darwin LDFLAGS: -framework VISA
+//#cgo windows LDFLAGS: -L. -lvisa32
 
 #include <stdlib.h>
 #include <visa.h>
