@@ -522,21 +522,21 @@ func (instr Object) Out32(space uint16, offset BusAddress, val uint32) Status {
 }
 
 // In64 Reads in an 64-bit value from the specified memory space and offset.
-func (instr Object) In64(space uint16, offset BusAddress) (val uint64, status Status) {
-	status = Status(C.viIn64((C.ViSession)(instr),
-		(C.ViUInt16)(space),
-		(C.ViBusAddress)(offset),
-		(*C.ViUInt64)(&val)))
-	return val, status
-}
+// func (instr Object) In64(space uint16, offset BusAddress) (val uint64, status Status) {
+// 	status = Status(C.viIn64((C.ViSession)(instr),
+// 		(C.ViUInt16)(space),
+// 		(C.ViBusAddress)(offset),
+// 		(*C.ViUInt64)(&val)))
+// 	return val, status
+// }
 
 // Out64 Writes an 64-bit value to the specified memory space and offset.
-func (instr Object) Out64(space uint16, offset BusAddress, val uint64) Status {
-	return Status(C.viOut64((C.ViSession)(instr),
-		(C.ViUInt16)(space),
-		(C.ViBusAddress)(offset),
-		(C.ViUInt64)(val)))
-}
+// func (instr Object) Out64(space uint16, offset BusAddress, val uint64) Status {
+// 	return Status(C.viOut64((C.ViSession)(instr),
+// 		(C.ViUInt16)(space),
+// 		(C.ViBusAddress)(offset),
+// 		(C.ViUInt64)(val)))
+// }
 
 // MoveIn8 Moves a block of data from the specified address space and offset to local memory.
 func (instr Object) MoveIn8(space uint16, offset BusAddress, length BusSize) ([]uint8, Status) {
@@ -599,24 +599,24 @@ func (instr Object) MoveOut32(space uint16, offset BusAddress, length BusSize, b
 }
 
 // MoveIn64 Moves a block of data from the specified address space and offset to local memory.
-func (instr Object) MoveIn64(space uint16, offset BusAddress, length BusSize) ([]uint64, Status) {
-	buf := make([]uint64, length)
-	status := Status(C.viMoveIn64((C.ViSession)(instr),
-		(C.ViUInt16)(space),
-		(C.ViBusAddress)(offset),
-		(C.ViBusSize)(length),
-		(C.ViAUInt64)(unsafe.Pointer(&buf[0]))))
-	return buf, status
-}
+// func (instr Object) MoveIn64(space uint16, offset BusAddress, length BusSize) ([]uint64, Status) {
+// 	buf := make([]uint64, length)
+// 	status := Status(C.viMoveIn64((C.ViSession)(instr),
+// 		(C.ViUInt16)(space),
+// 		(C.ViBusAddress)(offset),
+// 		(C.ViBusSize)(length),
+// 		(C.ViAUInt64)(unsafe.Pointer(&buf[0]))))
+// 	return buf, status
+// }
 
 // MoveOut64 Moves a block of data from local memory to the specified address space and offset.
-func (instr Object) MoveOut64(space uint16, offset BusAddress, length BusSize, buf []uint64) Status {
-	return Status(C.viMoveOut64((C.ViSession)(instr),
-		(C.ViUInt16)(space),
-		(C.ViBusAddress)(offset),
-		(C.ViBusSize)(length),
-		(C.ViAUInt64)(unsafe.Pointer(&buf[0]))))
-}
+// func (instr Object) MoveOut64(space uint16, offset BusAddress, length BusSize, buf []uint64) Status {
+// 	return Status(C.viMoveOut64((C.ViSession)(instr),
+// 		(C.ViUInt16)(space),
+// 		(C.ViBusAddress)(offset),
+// 		(C.ViBusSize)(length),
+// 		(C.ViAUInt64)(unsafe.Pointer(&buf[0]))))
+// }
 
 // Move Moves a block of data.
 func (instr Object) Move(srcSpace uint16, srcOffset BusAddress, srcWidth uint16, destSpace uint16,
@@ -701,15 +701,15 @@ func (instr Object) Poke32(address unsafe.Pointer, val uint32) {
 }
 
 // Peek64 Reads an 64-bit value from the specified address.
-func (instr Object) Peek64(address unsafe.Pointer) (val uint64) {
-	C.viPeek64((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt64)(&val))
-	return val
-}
+// func (instr Object) Peek64(address unsafe.Pointer) (val uint64) {
+// 	C.viPeek64((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt64)(&val))
+// 	return val
+// }
 
 // Poke64 Writes an 64-bit value to the specified address.
-func (instr Object) Poke64(address unsafe.Pointer, val uint64) {
-	C.viPoke64((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt64)(val))
-}
+// func (instr Object) Poke64(address unsafe.Pointer, val uint64) {
+// 	C.viPoke64((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt64)(val))
+// }
 
 // ------------------------
 // Shared Memory Operations
