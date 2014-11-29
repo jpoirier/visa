@@ -60,6 +60,7 @@ import "unsafe"
 var PackageVersion string = "v0.1"
 
 type Driver interface {
+	Close() Status
 	Read(cnt uint32) (buf []byte, retCnt uint32, status Status)
 	Write(buf []byte, cnt uint32) (retCnt uint32, status Status)
 }

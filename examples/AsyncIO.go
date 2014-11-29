@@ -33,7 +33,6 @@ import (
 )
 
 var rdCount uint32
-var rcount uint32
 var stopflag vi.Bool
 var statusSession vi.Status
 
