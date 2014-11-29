@@ -44,7 +44,7 @@ package visa
 
 #cgo linux CFLAGS:
 #cgo darwin CFLAGS:
-#cgo windows CFLAGS: -I.
+#cgo windows CFLAGS: -I. -D_MSC_VER=1200
 
 #include <stdlib.h>
 #include <visa.h>
