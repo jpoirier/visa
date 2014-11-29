@@ -55,8 +55,8 @@
 #define _VI_PTR             _VI_FAR *
 
 /*- VISA Types --------------------------------------------------------------*/
-typedef unsigned   __int64  ViUInt64;
-typedef _VI_SIGNED __int64  ViInt64;
+//typedef unsigned   __int64  ViUInt64;
+//typedef _VI_SIGNED __int64  ViInt64;
 #define _VI_INT64_UINT64_DEFINED
 #ifndef _VI_INT64_UINT64_DEFINED
 	#if defined(_WIN64) || ((defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)) && !defined(_NI_mswin16_))
