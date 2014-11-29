@@ -44,7 +44,7 @@ package visa
 
 #cgo linux CFLAGS:
 #cgo darwin CFLAGS:
-#cgo windows CFLAGS: -I. -D_MSC_VER=1200
+#cgo windows CFLAGS: -I.
 
 #include <stdlib.h>
 #include <visa.h>
@@ -869,8 +869,8 @@ func (instr Object) PxiReserveTriggers(cnt int16, trigBuses, trigLines *int16) (
 }
 
 // VxiServantResponse ?
-func (instr Object) VxiServantResponse(mode int16, resp uint32) Status {
-	return Status(C.viVxiServantResponse((C.ViSession)(instr),
-		(C.ViInt16)(mode),
-		(C.ViUInt32)(resp)))
-}
+//func (instr Object) VxiServantResponse(mode int16, resp uint32) Status {
+//	return Status(C.viVxiServantResponse((C.ViSession)(instr),
+//		(C.ViInt16)(mode),
+//		(C.ViUInt32)(resp)))
+//}
