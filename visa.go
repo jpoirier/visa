@@ -35,7 +35,7 @@
 package visa
 
 /*
-#cgo linux CFLAGS:
+#cgo linux CFLAGS: -I.
 #cgo darwin CFLAGS:
 #cgo windows CFLAGS: -I.
 #cgo and64 linux LDFLAGS: -L/usr/local/lib -lvisa64
