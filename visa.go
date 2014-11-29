@@ -21,16 +21,16 @@
 //     http://www.ni.com/white-paper/3702/en/
 //
 // Operation specific sections:
-// - Resource Manager Functions and Operations
-// - Resource Template Operations
-// - Basic I/O Operations
-// - Formatted and Buffered I/O Operations
-// - Memory I/O Operations
-// - Shared Memory Operations
-// - Interface Specific Operations
+//     Resource Manager Functions and Operations
+//     Resource Template Operations
+//     Basic I/O Operations
+//     Formatted and Buffered I/O Operations
+//     Memory I/O Operations
+//     Shared Memory Operations
+//     Interface Specific Operations
 
-// mingw-gcc doesn't like _MSC_VER
-// the if defined check doesn't seem to work for the embedded cgo args
+// For Windows builds, mingw-gcc doesn't like _MSC_VER; the if defined check
+// doesn't seem to work with the embedded cgo args
 
 package visa
 
