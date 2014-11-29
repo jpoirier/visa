@@ -456,7 +456,7 @@ func (d *Driver) SavePeakTable(filename string) (status vi.Status) {
 }
 
 // SaveSpectogram Saves the spectogram to filename.
-func (d *Driver) SavePeakTable(filename string) (status vi.Status) {
+func (d *Driver) SaveSpectogram(filename string) (status vi.Status) {
 	b := fmt.Sprintf("MMEM:STOR:RES:SPEC '%s'", filename)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
