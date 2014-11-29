@@ -1,24 +1,42 @@
-goVISA
-======
+# Description
 
-A Go wrapper around National Instruments VISA (Virtual Instrument Software Architecture) driver.
+Package visa wraps National Instruments VISA (Virtual Instrument Software
+Architecture) driver. The driver allows a client application to communicate
+with most instrumentation buses including GPIB, USB, Serial, and Ethernet.
+The Virtual Instrument Software Architecture (VISA) is a standard for
+configuring, programming, and troubleshooting instrumentation systems
+comprising GPIB, VXI, PXI, serial (RS232/RS485), Ethernet/LXI, and/or USB
+interfaces.
 
-http://dave.cheney.net/2012/09/08/an-introduction-to-cross-compilation-with-go
+The package is low level and, for the most part, is one-to-one with the
+exported C functions it wraps. Clients would typically build an instrument
+specific driver around the package but it can also be used directly.
 
-sudo mount -o loop NI-VISA-14.0.0.iso /mnt/disk
+[NI-VISA Overview] (http://www.ni.com/white-paper/3702/en/)
 
-to cross compile
-----------------
-- use dave cheney's crosscompile to to build the 386 compiler
-- sudo su
-- export CGO_ENABLED=1
-- export GOARCH=386
-- go build visa,go defs.go
+Supported Platforms:
+* Linux
+* OS X
+* Windows
 
-for compile checks I created a stubbed 64-bit version of libvisa.so
 
-https://code.google.com/p/go-wiki/wiki/cgo
+# Installation
 
-Notes to me:
-- saved /usr/local/lib/libvisa.so to /usr/local/lib/libvisa.so.orig
-- moved my lib stubs to /usr/local/lib/
+## Dependencies
+* [Go tools](https://golang.org)
+* [NI-VISA] (http://www.ni.com/downloads/ni-drivers/)
+* [git] (https://git-scm.com)
+
+## Usage
+All functions in libvisa are accessible from the gortlsdr package:
+
+    go get -u github.com/jpoirier/visa
+    go get -u github.com/jpoirier/mxa
+    go get -u github.com/jpoirier/keithley
+
+## Example
+See the examples folder:
+
+    go run FindRsrc.go
+
+
