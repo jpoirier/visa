@@ -391,15 +391,15 @@ func (d *Driver) SetMarkerNextPeakL(marker uint32) (status vi.Status) {
 	return
 }
 
-// SetMarkerContPeak Sets marker continuous peak search on.
-func (d *Driver) SetMarkerContPeak(marker uint32) (status vi.Status) {
+// SetMarkerContPeakOn Sets marker continuous peak search on.
+func (d *Driver) SetMarkerContPeakOn(marker uint32) (status vi.Status) {
 	b := fmt.Sprintf("CALC:MARK%d:CPSEARCH: ON", marker)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
 
 // SetMarkerContPeakOff Sets marker continuous peak search off.
-func (d *Driver) SetMarkerContPeak(marker uint32) (status vi.Status) {
+func (d *Driver) SetMarkerContPeakOff(marker uint32) (status vi.Status) {
 	b := fmt.Sprintf("CALC:MARK%d:CPSEARCH: OFF", marker)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
