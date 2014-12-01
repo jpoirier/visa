@@ -39,12 +39,12 @@ package visa
 #cgo darwin LDFLAGS: -framework VISA
 #cgo windows LDFLAGS: -L. -lvisa64
 #cgo 386 linux LDFLAGS: -L/usr/local/lib -lvisa
-//#cgo darwin LDFLAGS: -framework VISA
-//#cgo windows LDFLAGS: -L. -lvisa32
+#cgo 386 darwin LDFLAGS: -framework VISA
+#cgo 386 windows LDFLAGS: -L. -lvisa32
 #cgo CFLAGS: -I.
 
 #include <stdlib.h>
-#include <visa.h>
+#include "visa.h"
 
 extern void go_cb(ViSession, ViEventType, ViEvent, ViAddr);
 ViHndlr get_go_cb(void) {
