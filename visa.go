@@ -29,8 +29,8 @@
 //     Shared Memory Operations
 //     Interface Specific Operations
 
-// For Windows builds, mingw-gcc doesn't like _MSC_VER; the if defined check
-// doesn't seem to work with the embedded cgo args
+// For Windows builds, a) mingw-gcc doesn't like _MSC_VER; b) setting the -L
+// path doesn't seem to work nor does setting #cgo 386.
 
 package visa
 
