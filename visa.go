@@ -34,13 +34,13 @@
 
 package visa
 
-/*
-#cgo linux amd64 LDFLAGS: -L/usr/local/lib -lvisa64
-#cgo darwin amd64 LDFLAGS: -framework VISA
-#cgo windows amd64 LDFLAGS: -L. -lvisa64
-#cgo linux 386 LDFLAGS: -L/usr/local/lib -lvisa
-#cgo darwin 386 LDFLAGS: -framework VISA
-#cgo windows 386 LDFLAGS: -L. -lvisa32
+
+#cgo linux LDFLAGS: -L/usr/local/lib -lvisa64
+#cgo darwin LDFLAGS: -framework VISA
+#cgo windows LDFLAGS: -L. -lvisa64
+#cgo linux LDFLAGS: -L/usr/local/lib -lvisa
+#cgo darwin LDFLAGS: -framework VISA
+#cgo windows LDFLAGS: -L. -lvisa32
 #cgo CFLAGS: -I.
 
 #include <stdlib.h>
@@ -50,7 +50,7 @@ extern void go_cb(ViSession, ViEventType, ViEvent, ViAddr);
 ViHndlr get_go_cb(void) {
 	return (ViHndlr)go_cb;
 }
-*/
+
 import "C"
 import "unsafe"
 
