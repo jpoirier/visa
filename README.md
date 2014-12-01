@@ -49,3 +49,7 @@ Windows
 
 Building visa on Windows
 ------------------------
+
+Additional dependencies to build the visa wrapper
+
+* [mingw-w64] (http://sourceforge.net/projects/mingw-w64/?source=recommended)

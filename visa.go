@@ -35,15 +35,13 @@
 package visa
 
 /*
-#cgo linux LDFLAGS: -L/usr/local/lib -lvisa64
-#cgo darwin LDFLAGS: -framework VISA
-#cgo windows LDFLAGS: -L. -lvisa64
-//#cgo linux LDFLAGS: -L/usr/local/lib -lvisa
-//#cgo darwin LDFLAGS: -framework VISA
-//#cgo windows LDFLAGS: -L. -lvisa32
-#cgo linux CFLAGS: -I.
-#cgo darwin CFLAGS:
-#cgo windows CFLAGS: -I.
+#cgo amd64 linux LDFLAGS: -L/usr/local/lib -lvisa64
+#cgo amd64 darwin LDFLAGS: -framework VISA
+#cgo amd64 windows LDFLAGS: -L. -lvisa64
+#cgo 386 linux LDFLAGS: -L/usr/local/lib -lvisa
+#cgo 386 darwin LDFLAGS: -framework VISA
+#cgo 386 windows LDFLAGS: -L. -lvisa32
+#cgo CFLAGS: -I.
 
 #include <stdlib.h>
 #include <visa.h>
@@ -68,7 +66,7 @@ type Status int32
 type Session uint32
 type Object uint32
 
-// Platform (32 or 64 bit) specific, as determined at compile time
+// Platform specific types, 32 or 64 bit, as determined at compile time.
 type BusAddress C.ViBusAddress
 type PBusAddress C.ViPBusAddress
 type BusSize C.ViBusSize
@@ -79,9 +77,9 @@ type Bool C.ViBoolean
 type UserCallback func(instr Object, etype, eventContext uint32)
 type PUserCallback *UserCallback
 
-// -----------------------------------------
+// ----------------------------------------------------------------------------
 // Resource Manager Functions and Operations
-// -----------------------------------------
+//
 
 // OpenDefaultRM returns a session to the Default Resource Manager resource.
 func OpenDefaultRM() (rm Session, status Status) {
@@ -125,7 +123,7 @@ func (rm Session) ParseRsrc(rsrcName string) (intfType, intfNum uint16, status S
 	return intfType, intfNum, status
 }
 
-// ParseRsrcEx Parses a resource string to get extended interface information.
+// ParseRsrcEx parses a resource string to get extended interface information.
 func (rm Session) ParseRsrcEx(rsrcName string) (intfType, intfNum uint16,
 	rsrcClass, expandedUnaliasedName, aliasIfExists string, status Status) {
 
@@ -144,7 +142,7 @@ func (rm Session) ParseRsrcEx(rsrcName string) (intfType, intfNum uint16,
 	return intfType, intfNum, string(r), string(e), string(a), status
 }
 
-// Open Opens a session to the specified resource.
+// Open opens a session to the specified resource.
 func (rm Session) Open(name string, mode, timeout uint32) (instr Object, status Status) {
 	cname := (*C.ViChar)(C.CString(name))
 	defer C.free(unsafe.Pointer(cname))
@@ -156,38 +154,38 @@ func (rm Session) Open(name string, mode, timeout uint32) (instr Object, status 
 	return instr, status
 }
 
-// ----------------------------
+// ----------------------------------------------------------------------------
 // Resource Template Operations
-// ----------------------------
+//
 
-// Close Closes the specified session.
+// Close closes the specified session.
 func (rm Session) Close() Status {
 	return Status(C.viClose((C.ViObject)(rm)))
 }
 
-// Close Closes the specified instrument, or find list.
+// Close closes the specified instrument, or find list.
 func (instr Object) Close() Status {
 	return Status(C.viClose((C.ViObject)(instr)))
 }
 
-// Close Closes the specified find list.
+// Close closes the specified find list.
 func Close(list uint32) Status {
 	return Status(C.viClose((C.ViObject)(list)))
 }
 
-// SetAttribute Sets the state of an attribute.
+// SetAttribute sets the state of an attribute.
 func (instr Object) SetAttribute(attribute, attrState uint32) Status {
 	return Status(C.viSetAttribute((C.ViObject)(instr),
 		(C.ViAttr)(attribute),
 		(C.ViAttrState)(attrState)))
 }
 
-// GetAttribute Retrieves the state of an attribute.
+// GetAttribute retrieves the state of an attribute.
 func (instr Object) GetAttribute(attrName uint32, addr unsafe.Pointer) Status {
 	return Status(C.viGetAttribute((C.ViObject)(instr), (C.ViAttr)(attrName), addr))
 }
 
-// StatusDesc Returns a user-readable description of the status code passed to the operation.
+// StatusDesc returns a user-readable description of the status code passed to the operation.
 func (instr Object) StatusDesc(status_in Status) (string, Status) {
 	d := make([]byte, 257)
 	status := Status(C.viStatusDesc((C.ViObject)(instr),
@@ -196,14 +194,14 @@ func (instr Object) StatusDesc(status_in Status) (string, Status) {
 	return string(d), status
 }
 
-// Terminate Requests a VISA session to terminate normal execution of an operation.
+// Terminate requests a VISA session to terminate normal execution of an operation.
 func (instr Object) Terminate(degree, jobId uint16) Status {
 	return Status(C.viTerminate((C.ViObject)(instr),
 		(C.ViUInt16)(degree),
 		(C.ViJobId)(jobId)))
 }
 
-// Lock Establishes an access mode to the specified resource.
+// Lock establishes an access mode to the specified resource.
 func (instr Object) LockExclusive(lockType, timeout uint32) Status {
 	return Status(C.viLock((C.ViSession)(instr),
 		(C.ViAccessMode)(lockType),
@@ -212,7 +210,7 @@ func (instr Object) LockExclusive(lockType, timeout uint32) Status {
 		(*C.ViChar)(nil)))
 }
 
-// Lock Establishes an access mode to the specified resource.
+// Lock establishes an access mode to the specified resource.
 func (instr Object) Lock(lockType, timeout uint32, requestedKey string) (string, Status) {
 	rk := (*C.ViChar)(C.CString(requestedKey))
 	defer C.free(unsafe.Pointer(rk))
@@ -225,12 +223,12 @@ func (instr Object) Lock(lockType, timeout uint32, requestedKey string) (string,
 	return string(a), status
 }
 
-// Unlock Relinquishes a lock for the specified resource.
+// Unlock relinquishes a lock for the specified resource.
 func (instr Object) Unlock() Status {
 	return Status(C.viUnlock((C.ViSession)(instr)))
 }
 
-// EnableEvent Enables notification of a specified event.
+// EnableEvent enables notification of a specified event.
 func (instr Object) EnableEvent(eventType uint32, mechanism uint16, context uint32) Status {
 
 	return Status(C.viEnableEvent((C.ViSession)(instr),
@@ -239,7 +237,7 @@ func (instr Object) EnableEvent(eventType uint32, mechanism uint16, context uint
 		(C.ViEventFilter)(context)))
 }
 
-// DisableEvent Disables notification of the specified event type(s)
+// DisableEvent disables notification of the specified event type(s)
 // via the specified mechanism(s).
 func (instr Object) DisableEvent(eventType uint32, mechanism uint16) Status {
 	return Status(C.viDisableEvent((C.ViSession)(instr),
@@ -247,7 +245,7 @@ func (instr Object) DisableEvent(eventType uint32, mechanism uint16) Status {
 		(C.ViUInt16)(mechanism)))
 }
 
-// DiscardEvents Discards event occurrences for specified event types
+// DiscardEvents discards event occurrences for specified event types
 // and mechanisms in a session.
 func (instr Object) DiscardEvents(eventType uint32, mechanism uint16) Status {
 	return Status(C.viDiscardEvents((C.ViSession)(instr),
@@ -255,7 +253,7 @@ func (instr Object) DiscardEvents(eventType uint32, mechanism uint16) Status {
 		(C.ViUInt16)(mechanism)))
 }
 
-// WaitOnEvent Waits for an occurrence of the specified event for a given session.
+// WaitOnEvent waits for an occurrence of the specified event for a given session.
 func (instr Object) WaitOnEvent(inEventType, timeout uint32) (outEventType,
 	outContext uint32, status Status) {
 
@@ -267,7 +265,7 @@ func (instr Object) WaitOnEvent(inEventType, timeout uint32) (outEventType,
 	return outEventType, outContext, status
 }
 
-// InstallHandler Installs handlers for event callbacks.
+// InstallHandler installs handlers for event callbacks.
 func (instr Object) InstallHandler(eventType uint32, userHandle UserCallback) Status {
 	return Status(C.viInstallHandler((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
@@ -275,7 +273,7 @@ func (instr Object) InstallHandler(eventType uint32, userHandle UserCallback) St
 		(C.ViAddr)(unsafe.Pointer(&userHandle))))
 }
 
-// UninstallHandler Uninstalls handlers for events.
+// UninstallHandler uninstalls handlers for events.
 // Note that VISA identifies handlers uniquely using the userHandle reference.
 func (instr Object) UninstallHandler(eventType uint32, userHandle UserCallback) Status {
 	return Status(C.viUninstallHandler((C.ViSession)(instr),
@@ -284,11 +282,11 @@ func (instr Object) UninstallHandler(eventType uint32, userHandle UserCallback) 
 		(C.ViAddr)(unsafe.Pointer(&userHandle))))
 }
 
-// --------------------
+// ----------------------------------------------------------------------------
 // Basic I/O Operations
-// --------------------
+//
 
-// Read Reads data from device or interface synchronously.
+// Read reads data from device or interface synchronously.
 func (instr Object) Read(cnt uint32) (buf []byte, retCnt uint32, status Status) {
 	buf = make([]byte, cnt)
 	status = Status(C.viRead((C.ViSession)(instr),
@@ -298,7 +296,7 @@ func (instr Object) Read(cnt uint32) (buf []byte, retCnt uint32, status Status) 
 	return buf, retCnt, status
 }
 
-// ReadAsync Reads data from device or interface asynchronously.
+// ReadAsync reads data from device or interface asynchronously.
 func (instr Object) ReadAsync(cnt uint32) (buf []byte, jobId uint32, status Status) {
 	buf = make([]byte, cnt)
 	status = Status(C.viReadAsync((C.ViSession)(instr),
@@ -308,7 +306,7 @@ func (instr Object) ReadAsync(cnt uint32) (buf []byte, jobId uint32, status Stat
 	return buf, jobId, status
 }
 
-// ReadToFile Reads data synchronously and stores the transferred data in a file.
+// ReadToFile reads data synchronously and stores the transferred data in a file.
 func (instr Object) ReadToFile(filename string, cnt uint32) (retCnt uint32, status Status) {
 	cfilename := (*C.ViChar)(C.CString(filename))
 	defer C.free(unsafe.Pointer(cfilename))
@@ -319,7 +317,7 @@ func (instr Object) ReadToFile(filename string, cnt uint32) (retCnt uint32, stat
 	return retCnt, status
 }
 
-// Write Writes data to a device or interface synchronously.
+// Write writes data to a device or interface synchronously.
 func (instr Object) Write(buf []byte, cnt uint32) (retCnt uint32, status Status) {
 	status = Status(C.viWrite((C.ViSession)(instr),
 		(C.ViBuf)(unsafe.Pointer(&buf[0])),
@@ -328,7 +326,7 @@ func (instr Object) Write(buf []byte, cnt uint32) (retCnt uint32, status Status)
 	return retCnt, status
 }
 
-// WriteAsync Writes data to a device or interface asynchronously.
+// WriteAsync writes data to a device or interface asynchronously.
 func (instr Object) WriteAsync(buf []byte, cnt uint32) (jobId uint32, status Status) {
 	status = Status(C.viWriteAsync((C.ViSession)(instr),
 		(C.ViBuf)(unsafe.Pointer(&buf[0])),
@@ -337,7 +335,7 @@ func (instr Object) WriteAsync(buf []byte, cnt uint32) (jobId uint32, status Sta
 	return jobId, status
 }
 
-// WriteFromFile Take data from a file and write it out synchronously.
+// WriteFromFile take data from a file and write it out synchronously.
 func (instr Object) WriteFromFile(filename string, cnt uint32) (retCnt uint32, status Status) {
 	cfilename := (*C.ViChar)(C.CString(filename))
 	defer C.free(unsafe.Pointer(cfilename))
@@ -348,29 +346,29 @@ func (instr Object) WriteFromFile(filename string, cnt uint32) (retCnt uint32, s
 	return retCnt, status
 }
 
-// AssertTrigger Asserts software or hardware trigger.
+// AssertTrigger asserts software or hardware trigger.
 func (instr Object) AssertTrigger(protocol uint16) Status {
 	return Status(C.viAssertTrigger((C.ViSession)(instr),
 		(C.ViUInt16)(protocol)))
 }
 
-// ReadSTB Reads a status byte of the service request.
+// ReadSTB reads a status byte of the service request.
 func (instr Object) ReadSTB() (stb_stat uint16, status Status) {
 	status = Status(C.viReadSTB((C.ViSession)(instr),
 		(*C.ViUInt16)(unsafe.Pointer(&stb_stat))))
 	return stb_stat, status
 }
 
-// Clear Clears a device.
+// Clear clears a device.
 func (instr Object) Clear() Status {
 	return Status(C.viClear((C.ViSession)(instr)))
 }
 
-// -------------------------------------
+// ----------------------------------------------------------------------------
 // Formatted and Buffered I/O Operations
-// -------------------------------------
+//
 
-// ViSetBuf Sets the size for the formatted I/O and/or low-level
+// ViSetBuf sets the size for the formatted I/O and/or low-level
 // I/O communication buffer(s).
 func (instr Object) SetBuf(mask uint16, size uint32) Status {
 	return Status(C.viSetBuf((C.ViSession)(instr),
@@ -378,14 +376,14 @@ func (instr Object) SetBuf(mask uint16, size uint32) Status {
 		(C.ViUInt32)(size)))
 }
 
-// Flush Manually flushes the specified buffers associated with
+// Flush manually flushes the specified buffers associated with
 // formatted I/O operations and/or serial communication.
 func (instr Object) Flush(mask uint16) Status {
 	return Status(C.viFlush((C.ViSession)(instr),
 		(C.ViUInt16)(mask)))
 }
 
-// BufWrite Writes data to a formatted I/O write buffer synchronously.
+// BufWrite writes data to a formatted I/O write buffer synchronously.
 func (instr Object) BufWrite(buf []byte, cnt uint32) (retCnt uint32, status Status) {
 	status = Status(C.viBufWrite((C.ViSession)(instr),
 		(C.ViBuf)(unsafe.Pointer(&buf[0])),
@@ -394,7 +392,7 @@ func (instr Object) BufWrite(buf []byte, cnt uint32) (retCnt uint32, status Stat
 	return retCnt, status
 }
 
-// BufRead Reads data from a device or interface through the use of a formatted I/O read buffer.
+// BufRead reads data from a device or interface through the use of a formatted I/O read buffer.
 func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Status) {
 	buf = make([]byte, cnt)
 	status = Status(C.viBufRead((C.ViSession)(instr),
@@ -406,7 +404,7 @@ func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Statu
 
 // TODO: formatted IO
 
-// Printf Converts, formats, and sends the parameters (designated by ...)
+// Printf converts, formats, and sends the parameters (designated by ...)
 // to the device as specified by the format string.
 // ViStatus _VI_FUNCC viPrintf        (ViSession vi, ViString writeFmt, ...);
 // func (instr Object) Printf(writeFmt string, args ...interface{}) Status {
@@ -417,7 +415,7 @@ func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Statu
 // 		(*C.ViVAList)(args)))
 // }
 
-// VPrintf Converts, formats, and sends the parameters designated by params
+// VPrintf converts, formats, and sends the parameters designated by params
 // to the device or interface as specified by the format string.
 // ViStatus _VI_FUNC  viVPrintf       (ViSession vi, ViString writeFmt, ViVAList params);
 // func (instr Object) VPrintf(writeFmt string, args ...interface{}) Status {
@@ -428,48 +426,48 @@ func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Statu
 // 		(*C.ViVAList)(args)))
 // }
 
-// SPrintf Converts, formats, and sends the parameters (designated by ...)
+// SPrintf converts, formats, and sends the parameters (designated by ...)
 // to a user-specified buffer as specified by the format string.
 // ViStatus _VI_FUNCC viSPrintf       (ViSession vi, ViPBuf buf, ViString writeFmt, ...);
 
-// VSPrintf Converts, formats, and sends the parameters designated by params
+// VSPrintf converts, formats, and sends the parameters designated by params
 // to a user-specified buffer as specified by the format string.
 // ViStatus _VI_FUNC  viVSPrintf      (ViSession vi, ViPBuf buf, ViString writeFmt,
 //                                     ViVAList parms);
 
-// Scanf Reads, converts, and formats data using the format specifier.
+// Scanf reads, converts, and formats data using the format specifier.
 // Stores the formatted data in the parameters (designated by ...).
 // ViStatus _VI_FUNCC viScanf         (ViSession vi, ViString readFmt, ...);
 
-// VScanf Reads, converts, and formats data using the format specifier.
+// VScanf reads, converts, and formats data using the format specifier.
 // Stores the formatted data in the parameters designated by params.
 // ViStatus _VI_FUNC  viVScanf        (ViSession vi, ViString readFmt, ViVAList params);
 
-// SScanf Reads, converts, and formats data from a user-specified buffer
+// SScanf reads, converts, and formats data from a user-specified buffer
 // using the format specifier. Stores the formatted data in the parameters
 // (designated by ...).
 // ViStatus _VI_FUNCC viSScanf        (ViSession vi, ViBuf buf, ViString readFmt, ...);
 
-// VSScanf Reads, converts, and formats data from a user-specified buffer
+// VSScanf reads, converts, and formats data from a user-specified buffer
 // using the format specifier. Stores the formatted data in the parameters
 // designated by params.
 // ViStatus _VI_FUNC  viVSScanf       (ViSession vi, ViBuf buf, ViString readFmt,
 //                                     ViVAList parms);
 
-// Queryf Performs a formatted write and read through a single call
+// Queryf performs a formatted write and read through a single call
 // to an operation.
 // ViStatus _VI_FUNCC viQueryf        (ViSession vi, ViString writeFmt, ViString readFmt, ...);
 
-// VQueryf Performs a formatted write and read through a single call
+// VQueryf performs a formatted write and read through a single call
 // to an operation.
 // ViStatus _VI_FUNC  viVQueryf       (ViSession vi, ViString writeFmt, ViString readFmt,
 //                                     ViVAList params);
 
-// ---------------------
+// ----------------------------------------------------------------------------
 // Memory I/O Operations
-// ---------------------
+//
 
-// In8 Reads in an 8-bit value from the specified memory space and offset.
+// In8 reads in an 8-bit value from the specified memory space and offset.
 func (instr Object) In8(space uint16, offset BusAddress) (val uint8, status Status) {
 	status = Status(C.viIn8((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -478,7 +476,7 @@ func (instr Object) In8(space uint16, offset BusAddress) (val uint8, status Stat
 	return val, status
 }
 
-// Out8 Writes an 8-bit value to the specified memory space and offset.
+// Out8 writes an 8-bit value to the specified memory space and offset.
 func (instr Object) Out8(space uint16, offset BusAddress, val uint8) Status {
 	return Status(C.viOut8((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -486,7 +484,7 @@ func (instr Object) Out8(space uint16, offset BusAddress, val uint8) Status {
 		(C.ViUInt8)(val)))
 }
 
-// In16 Reads in an 16-bit value from the specified memory space and offset.
+// In16 reads in an 16-bit value from the specified memory space and offset.
 func (instr Object) In16(space uint16, offset BusAddress) (val uint16, status Status) {
 	status = Status(C.viIn16((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -495,7 +493,7 @@ func (instr Object) In16(space uint16, offset BusAddress) (val uint16, status St
 	return val, status
 }
 
-// Out16 Writes an 16-bit value to the specified memory space and offset.
+// Out16 writes an 16-bit value to the specified memory space and offset.
 func (instr Object) Out16(space uint16, offset BusAddress, val uint16) Status {
 	return Status(C.viOut16((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -503,7 +501,7 @@ func (instr Object) Out16(space uint16, offset BusAddress, val uint16) Status {
 		(C.ViUInt16)(val)))
 }
 
-// In32 Reads in an 32-bit value from the specified memory space and offset.
+// In32 reads in an 32-bit value from the specified memory space and offset.
 func (instr Object) In32(space uint16, offset BusAddress) (val uint32, status Status) {
 	status = Status(C.viIn32((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -512,7 +510,7 @@ func (instr Object) In32(space uint16, offset BusAddress) (val uint32, status St
 	return val, status
 }
 
-// Out32 Writes an 32-bit value to the specified memory space and offset.
+// Out32 writes an 32-bit value to the specified memory space and offset.
 func (instr Object) Out32(space uint16, offset BusAddress, val uint32) Status {
 	return Status(C.viOut32((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -520,24 +518,7 @@ func (instr Object) Out32(space uint16, offset BusAddress, val uint32) Status {
 		(C.ViUInt32)(val)))
 }
 
-// In64 Reads in an 64-bit value from the specified memory space and offset.
-func (instr Object) In64(space uint16, offset BusAddress) (val uint64, status Status) {
-	status = Status(C.viIn64((C.ViSession)(instr),
-		(C.ViUInt16)(space),
-		(C.ViBusAddress)(offset),
-		(*C.ViUInt64)(&val)))
-	return val, status
-}
-
-// Out64 Writes an 64-bit value to the specified memory space and offset.
-func (instr Object) Out64(space uint16, offset BusAddress, val uint64) Status {
-	return Status(C.viOut64((C.ViSession)(instr),
-		(C.ViUInt16)(space),
-		(C.ViBusAddress)(offset),
-		(C.ViUInt64)(val)))
-}
-
-// MoveIn8 Moves a block of data from the specified address space and offset to local memory.
+// MoveIn8 moves a block of data from the specified address space and offset to local memory.
 func (instr Object) MoveIn8(space uint16, offset BusAddress, length BusSize) ([]uint8, Status) {
 	buf := make([]uint8, length)
 	status := Status(C.viMoveIn8((C.ViSession)(instr),
@@ -548,7 +529,7 @@ func (instr Object) MoveIn8(space uint16, offset BusAddress, length BusSize) ([]
 	return buf, status
 }
 
-// MoveOut8 Moves a block of data from local memory to the specified
+// MoveOut8 moves a block of data from local memory to the specified
 func (instr Object) MoveOut8(space uint16, offset BusAddress, length BusSize, buf []uint8) Status {
 	return Status(C.viMoveOut8((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -557,7 +538,7 @@ func (instr Object) MoveOut8(space uint16, offset BusAddress, length BusSize, bu
 		(C.ViAUInt8)(unsafe.Pointer(&buf[0]))))
 }
 
-// MoveIn16 Moves a block of data from the specified address space and offset to local memory.
+// MoveIn16 moves a block of data from the specified address space and offset to local memory.
 func (instr Object) MoveIn16(space uint16, offset BusAddress, length BusSize) ([]uint16, Status) {
 	buf := make([]uint16, length)
 	status := Status(C.viMoveIn16((C.ViSession)(instr),
@@ -568,7 +549,7 @@ func (instr Object) MoveIn16(space uint16, offset BusAddress, length BusSize) ([
 	return buf, status
 }
 
-// MoveOut16 Moves a block of data from local memory to the specified address space and offset.
+// MoveOut16 moves a block of data from local memory to the specified address space and offset.
 func (instr Object) MoveOut16(space uint16, offset BusAddress, length BusSize, buf []uint16) Status {
 	return Status(C.viMoveOut16((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -577,7 +558,7 @@ func (instr Object) MoveOut16(space uint16, offset BusAddress, length BusSize, b
 		(C.ViAUInt16)(unsafe.Pointer(&buf[0]))))
 }
 
-// MoveIn32 Moves a block of data from the specified address space and offset to local memory.
+// MoveIn32 moves a block of data from the specified address space and offset to local memory.
 func (instr Object) MoveIn32(space uint16, offset BusAddress, length BusSize) ([]uint32, Status) {
 	buf := make([]uint32, length)
 	status := Status(C.viMoveIn32((C.ViSession)(instr),
@@ -588,7 +569,7 @@ func (instr Object) MoveIn32(space uint16, offset BusAddress, length BusSize) ([
 	return buf, status
 }
 
-// MoveOut32 Moves a block of data from local memory to the specified address space and offset.
+// MoveOut32 moves a block of data from local memory to the specified address space and offset.
 func (instr Object) MoveOut32(space uint16, offset BusAddress, length BusSize, buf []uint32) Status {
 	return Status(C.viMoveOut32((C.ViSession)(instr),
 		(C.ViUInt16)(space),
@@ -597,27 +578,7 @@ func (instr Object) MoveOut32(space uint16, offset BusAddress, length BusSize, b
 		(C.ViAUInt32)(unsafe.Pointer(&buf[0]))))
 }
 
-// MoveIn64 Moves a block of data from the specified address space and offset to local memory.
-func (instr Object) MoveIn64(space uint16, offset BusAddress, length BusSize) ([]uint64, Status) {
-	buf := make([]uint64, length)
-	status := Status(C.viMoveIn64((C.ViSession)(instr),
-		(C.ViUInt16)(space),
-		(C.ViBusAddress)(offset),
-		(C.ViBusSize)(length),
-		(C.ViAUInt64)(unsafe.Pointer(&buf[0]))))
-	return buf, status
-}
-
-// MoveOut64 Moves a block of data from local memory to the specified address space and offset.
-func (instr Object) MoveOut64(space uint16, offset BusAddress, length BusSize, buf []uint64) Status {
-	return Status(C.viMoveOut64((C.ViSession)(instr),
-		(C.ViUInt16)(space),
-		(C.ViBusAddress)(offset),
-		(C.ViBusSize)(length),
-		(C.ViAUInt64)(unsafe.Pointer(&buf[0]))))
-}
-
-// Move Moves a block of data.
+// Move moves a block of data.
 func (instr Object) Move(srcSpace uint16, srcOffset BusAddress, srcWidth uint16, destSpace uint16,
 	destOffset BusAddress, destWidth uint16, srcLength BusSize) Status {
 
@@ -631,7 +592,7 @@ func (instr Object) Move(srcSpace uint16, srcOffset BusAddress, srcWidth uint16,
 		(C.ViBusSize)(srcLength)))
 }
 
-// MoveAsync Moves a block of data asynchronously.
+// MoveAsync moves a block of data asynchronously.
 func (instr Object) MoveAsync(srcSpace uint16, srcOffset BusAddress, srcWidth, destSpace uint16,
 	destOffset BusAddress, destWidth uint16, srcLength BusSize) (jobId uint32, status Status) {
 
@@ -647,7 +608,7 @@ func (instr Object) MoveAsync(srcSpace uint16, srcOffset BusAddress, srcWidth, d
 	return jobId, status
 }
 
-// MapAddress Maps the specified memory space into the process’s address space.
+// MapAddress maps the specified memory space into the process’s address space.
 func (instr Object) MapAddress(mapSpace uint16, mapOffset BusAddress, mapSize BusSize,
 	access uint16, suggested *byte) (address *byte, status Status) {
 
@@ -661,60 +622,49 @@ func (instr Object) MapAddress(mapSpace uint16, mapOffset BusAddress, mapSize Bu
 	return address, status
 }
 
-// UnmapAddress Unmaps memory space previously mapped by ViMapAddress.
+// UnmapAddress unmaps memory space previously mapped by ViMapAddress.
 func (instr Object) UnmapAddress() Status {
 	return Status(C.viUnmapAddress((C.ViSession)(instr)))
 }
 
-// Peek8 Reads an 8-bit value from the specified address.
+// Peek8 reads an 8-bit value from the specified address.
 func (instr Object) Peek8(address unsafe.Pointer) (val uint8) {
 	C.viPeek8((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt8)(&val))
 	return val
 }
 
-// Poke8 Writes an 8-bit value to the specified address.
+// Poke8 writes an 8-bit value to the specified address.
 func (instr Object) Poke8(address unsafe.Pointer, val uint8) {
 	C.viPoke8((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt8)(val))
 }
 
-// Peek16 Reads an 16-bit value from the specified address.
+// Peek16 reads an 16-bit value from the specified address.
 func (instr Object) Peek16(address unsafe.Pointer) (val uint16) {
 	C.viPeek16((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt16)(&val))
 	return val
 }
 
-// Poke16 Writes an 16-bit value to the specified address.
+// Poke16 writes an 16-bit value to the specified address.
 func (instr Object) Poke16(address unsafe.Pointer, val uint16) {
 	C.viPoke16((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt16)(val))
 }
 
-// Peek32 Reads an 32-bit value from the specified address.
+// Peek32 reads an 32-bit value from the specified address.
 func (instr Object) Peek32(address unsafe.Pointer) (val uint32) {
 	C.viPeek32((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt32)(&val))
 	return val
 }
 
-// Poke32 Writes an 32-bit value to the specified address.
+// Poke32 writes an 32-bit value to the specified address.
 func (instr Object) Poke32(address unsafe.Pointer, val uint32) {
 	C.viPoke32((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt32)(val))
 }
 
-// Peek64 Reads an 64-bit value from the specified address.
-func (instr Object) Peek64(address unsafe.Pointer) (val uint64) {
-	C.viPeek64((C.ViSession)(instr), (C.ViAddr)(address), (*C.ViUInt64)(&val))
-	return val
-}
-
-// Poke64 Writes an 64-bit value to the specified address.
-func (instr Object) Poke64(address unsafe.Pointer, val uint64) {
-	C.viPoke64((C.ViSession)(instr), (C.ViAddr)(address), (C.ViUInt64)(val))
-}
-
-// ------------------------
+// ----------------------------------------------------------------------------
 // Shared Memory Operations
-// ------------------------
+//
 
-// MemAlloc Allocates memory from a device’s memory region.
+// MemAlloc allocates memory from a device’s memory region.
 func (instr Object) MemAlloc(size BusSize) (offset BusAddress, status Status) {
 	status = Status(C.viMemAlloc((C.ViSession)(instr),
 		(C.ViBusSize)(size),
@@ -722,35 +672,35 @@ func (instr Object) MemAlloc(size BusSize) (offset BusAddress, status Status) {
 	return offset, status
 }
 
-// MemFree Frees memory previously allocated using the viMemAlloc() operation.
+// MemFree frees memory previously allocated using the viMemAlloc() operation.
 func (instr Object) MemFree(offset BusAddress) Status {
 	return Status(C.viMemFree((C.ViSession)(instr), (C.ViBusAddress)(offset)))
 }
 
-// -----------------------------
+// ----------------------------------------------------------------------------
 // Interface Specific Operations
-// -----------------------------
+//
 
-// GpibControlREN Controls the state of the GPIB Remote Enable (REN)
+// GpibControlREN controls the state of the GPIB Remote Enable (REN)
 // interface line, and optionally the remote/local state of the device.
 func (instr Object) GpibControlREN(mode uint16) Status {
 	return Status(C.viGpibControlREN((C.ViSession)(instr),
 		(C.ViUInt16)(mode)))
 }
 
-// GpibControlATN Specifies the state of the ATN line and the local
+// GpibControlATN specifies the state of the ATN line and the local
 // active controller state.
 func (instr Object) GpibControlATN(mode uint16) Status {
 	return Status(C.viGpibControlATN((C.ViSession)(instr),
 		(C.ViUInt16)(mode)))
 }
 
-// GpibSendIFC Pulse the interface clear line (IFC) for at least 100 microseconds.
+// GpibSendIFC pulses the interface clear line (IFC) for at least 100 microseconds.
 func (instr Object) GpibSendIFC() Status {
 	return Status(C.viGpibSendIFC((C.ViSession)(instr)))
 }
 
-// GpibCommand Write GPIB command bytes on the bus.
+// GpibCommand writes GPIB command bytes on the bus.
 // ViStatus _VI_FUNC  viGpibCommand   (ViSession vi, ViBuf cmd, ViUInt32 cnt, ViPUInt32 retCnt);
 func (instr Object) GpibCommand(cmd []byte, cnt uint32) (retCnt uint32, status Status) {
 	status = Status(C.viGpibCommand((C.ViSession)(instr),
@@ -760,7 +710,7 @@ func (instr Object) GpibCommand(cmd []byte, cnt uint32) (retCnt uint32, status S
 	return retCnt, status
 }
 
-// GpibPassControl Tell the GPIB device at the specified address to
+// GpibPassControl tells the GPIB device at the specified address to
 // become controller in charge (CIC).
 func (instr Object) GpibPassControl(primAddr, secAddr uint16) Status {
 	return Status(C.viGpibPassControl((C.ViSession)(instr),
@@ -768,7 +718,7 @@ func (instr Object) GpibPassControl(primAddr, secAddr uint16) Status {
 		(C.ViUInt16)(secAddr)))
 }
 
-// VxiCommandQuery Sends the device a miscellaneous command or query and/or
+// VxiCommandQuery sends the device a miscellaneous command or query and/or
 // retrieves the response to a previous query.
 func (instr Object) VxiCommandQuery(mode uint16, cmd uint32) (response uint32, status Status) {
 	status = Status(C.viVxiCommandQuery((C.ViSession)(instr),
@@ -778,20 +728,20 @@ func (instr Object) VxiCommandQuery(mode uint16, cmd uint32) (response uint32, s
 	return response, status
 }
 
-// AssertUtilSignal Asserts or deasserts the specified utility bus signal.
+// AssertUtilSignal asserts or deasserts the specified utility bus signal.
 func (instr Object) AssertUtilSignal(line uint16) Status {
 	return Status(C.viAssertUtilSignal((C.ViSession)(instr),
 		(C.ViUInt16)(line)))
 }
 
-// AssertIntrSignal Asserts the specified interrupt or signal.
+// AssertIntrSignal asserts the specified interrupt or signal.
 func (instr Object) AssertIntrSignal(mode int16, statusID uint16) Status {
 	return Status(C.viAssertIntrSignal((C.ViSession)(instr),
 		(C.ViInt16)(mode),
 		(C.ViUInt32)(statusID)))
 }
 
-// MapTrigger Map the specified trigger source line to the specified
+// MapTrigger maps the specified trigger source line to the specified
 // destination line.
 func (instr Object) MapTrigger(trigSrc, trigDest int16, mode uint16) Status {
 	return Status(C.viMapTrigger((C.ViSession)(instr),
@@ -800,7 +750,7 @@ func (instr Object) MapTrigger(trigSrc, trigDest int16, mode uint16) Status {
 		(C.ViUInt16)(mode)))
 }
 
-// UnmapTrigger Undo a previous map from the specified trigger source
+// UnmapTrigger undoes a previous map from the specified trigger source
 // line to the specified destination line.
 func (instr Object) UnmapTrigger(trigSrc, trigDest int16) Status {
 	return Status(C.viUnmapTrigger((C.ViSession)(instr),
@@ -808,7 +758,7 @@ func (instr Object) UnmapTrigger(trigSrc, trigDest int16) Status {
 		(C.ViInt16)(trigDest)))
 }
 
-// UsbControlOut Performs a USB control pipe transfer to the device.
+// UsbControlOut performs a USB control pipe transfer to the device.
 func (instr Object) UsbControlOut(bmRequestType, bRequest int16, wValue, wIndex,
 	wLength uint16, buf []byte) Status {
 
@@ -821,7 +771,7 @@ func (instr Object) UsbControlOut(bmRequestType, bRequest int16, wValue, wIndex,
 		(*C.ViByte)(unsafe.Pointer(&buf[0]))))
 }
 
-// UsbControlIn Performs a USB control pipe transfer from the device.
+// UsbControlIn performs a USB control pipe transfer from the device.
 func (instr Object) UsbControlIn(bmRequestType, bRequest int16, wValue, wIndex,
 	wLength uint16) (buf []byte, retCnt uint16, status Status) {
 
@@ -837,27 +787,27 @@ func (instr Object) UsbControlIn(bmRequestType, bRequest int16, wValue, wIndex,
 	return buf, retCnt, status
 }
 
-// Version Returns the unformatted resource version number.
+// Version returns the unformatted resource version number.
 func Version() uint32 {
 	return uint32(C.VI_SPEC_VERSION)
 }
 
-// VersMajor Returns the major resource version number.
+// VersMajor returns the major resource version number.
 func VersMajor() uint32 {
 	return uint32((Version() & 0xFFF00000) >> 20)
 }
 
-// VersMinor Returns the minor resource version number.
+// VersMinor returns the minor resource version number.
 func VersMinor() uint32 {
 	return uint32((Version() & 0x000FFF00) >> 8)
 }
 
-// VersSubMinor Returns the sub-minor resource version number.
+// VersSubMinor returns the sub-minor resource version number.
 func VersSubMinor() uint32 {
 	return uint32((Version() & 0x000000FF))
 }
 
-// PxiReserveTriggers Reserves multiple trigger lines that the caller can then map and/or assert.
+// PxiReserveTriggers reserves multiple trigger lines that the caller can then map and/or assert.
 func (instr Object) PxiReserveTriggers(cnt int16, trigBuses, trigLines *int16) (failureIndex int16, status Status) {
 	status = Status(C.viPxiReserveTriggers((C.ViSession)(instr),
 		(C.ViInt16)(cnt),

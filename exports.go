@@ -5,11 +5,14 @@
 // Package visa wraps National Instruments VISA (Virtual Instrument Software
 // Architecture) driver. The driver allows a client application to communicate
 // with most instrumentation buses including GPIB, USB, Serial, and Ethernet.
-// VISA is an industry standard for instrument communications.
+// The Virtual Instrument Software Architecture (VISA) is a standard for
+// configuring, programming, and troubleshooting instrumentation systems
+// comprising GPIB, VXI, PXI, serial (RS232/RS485), Ethernet/LXI, and/or USB
+// interfaces.
 //
 // The package is low level and, for the most part, is one-to-one with the
-// exported C functions it wraps. Clients would typically build instrument
-// drivers around the package but it can also be used directly.
+// exported C functions it wraps. Clients would typically build an instrument
+// specific driver around the package but it can also be used directly.
 package visa
 
 /*
