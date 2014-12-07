@@ -148,8 +148,12 @@ ViStatus _VI_FUNC  viBufRead       (ViSession vi, ViPBuf buf, ViUInt32 cnt, ViPU
 
 ViStatus _VI_FUNCC viPrintf        (ViSession vi, ViString writeFmt);
 // ViStatus _VI_FUNCC viPrintf        (ViSession vi, ViString writeFmt, ...);
+
 ViStatus _VI_FUNC  viVPrintf       (ViSession vi, ViString writeFmt, ViVAList params);
-ViStatus _VI_FUNCC viSPrintf       (ViSession vi, ViPBuf buf, ViString writeFmt, ...);
+
+ViStatus _VI_FUNCC viSPrintf       (ViSession vi, ViPBuf buf, ViString writeFmt);
+// ViStatus _VI_FUNCC viSPrintf       (ViSession vi, ViPBuf buf, ViString writeFmt, ...);
+
 ViStatus _VI_FUNC  viVSPrintf      (ViSession vi, ViPBuf buf, ViString writeFmt,
                                     ViVAList parms);
 
