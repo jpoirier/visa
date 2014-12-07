@@ -410,7 +410,7 @@ func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Statu
 // Printf converts, formats, and sends the parameters (designated by args)
 // to the device as specified by the format string.
 func (instr Object) Printf(writeFmt string, args ...interface{}) Status {
-	cstr := (*C.ViChar)(C.CString(fmt.Sprintf(writeFmt, args)))
+	cstr := (*C.ViChar)(C.CString(fmt.Sprintf(writeFmt, args...)))
 	defer C.free(unsafe.Pointer(cstr))
 	return Status(C.viPrintf((C.ViSession)(instr), cstr))
 }
