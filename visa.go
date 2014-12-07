@@ -422,7 +422,7 @@ func (instr Object) SPrintf(buf *uint8, writeFmt string, args ...interface{}) St
 	cstr := (*C.ViChar)(C.CString(fmt.Sprintf(writeFmt, args)))
 	defer C.free(unsafe.Pointer(cstr))
 	return Status(C.viSPrintf((C.ViSession)(instr),
-		(*C.ViUInt8)(unsafe.Pointer(buf)), cstr))
+		(*C.ViByte)(unsafe.Pointer(buf)), cstr))
 }
 
 // VSPrintf converts, formats, and sends the parameters designated by params
