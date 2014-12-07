@@ -24,7 +24,7 @@
 //     Resource Manager Functions and Operations
 //     Resource Template Operations
 //     Basic I/O Operations
-//     Formatted and Buffered I/O Operations
+//     Formatted and Buffered I/O Operations (limited printf and scanf functionality)
 //     Memory I/O Operations
 //     Shared Memory Operations
 //     Interface Specific Operations
@@ -405,7 +405,8 @@ func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Statu
 	return buf, retCnt, status
 }
 
-// TODO: formatted IO
+// TODO: not all of these are feasible and/or worth the effort, but try
+// to implement the basics of each operation
 
 // Printf converts, formats, and sends the parameters (designated by args)
 // to the device as specified by the format string.
@@ -415,20 +416,14 @@ func (instr Object) Printf(writeFmt string, args ...interface{}) Status {
 	return Status(C.viPrintf((C.ViSession)(instr), cstr))
 }
 
-// SPrintf converts, formats, and sends the parameters (designated by ...)
+// SPrintf converts, formats, and sends the parameters (designated by args)
 // to a user-specified buffer as specified by the format string.
-// ViStatus _VI_FUNCC viSPrintf       (ViSession vi, ViPBuf buf, ViString writeFmt, ...);
 func (instr Object) SPrintf(buf *uint8, writeFmt string, args ...interface{}) Status {
 	cstr := (*C.ViChar)(C.CString(fmt.Sprintf(writeFmt, args)))
 	defer C.free(unsafe.Pointer(cstr))
 	return Status(C.viSPrintf((C.ViSession)(instr),
 		(*C.ViByte)(unsafe.Pointer(buf)), cstr))
 }
-
-// VSPrintf converts, formats, and sends the parameters designated by params
-// to a user-specified buffer as specified by the format string.
-// ViStatus _VI_FUNC  viVSPrintf      (ViSession vi, ViPBuf buf, ViString writeFmt,
-//                                     ViVAList parms);
 
 // Scanf reads, converts, and formats data using the format specifier.
 // Stores the formatted data in the parameters (designated by ...).
