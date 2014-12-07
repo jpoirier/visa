@@ -52,7 +52,10 @@ ViHndlr get_go_cb(void) {
 }
 */
 import "C"
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
 
 var PackageVersion string = "v0.1"
 
@@ -404,31 +407,23 @@ func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Statu
 
 // TODO: formatted IO
 
-// Printf converts, formats, and sends the parameters (designated by ...)
+// Printf converts, formats, and sends the parameters (designated by args)
 // to the device as specified by the format string.
-// ViStatus _VI_FUNCC viPrintf        (ViSession vi, ViString writeFmt, ...);
-// func (instr Object) Printf(writeFmt string, args ...interface{}) Status {
-// 	cwriteFmt := (*C.ViChar)(C.CString(writeFmt))
-// 	defer C.free(unsafe.Pointer(cwriteFmt))
-// 	return Status(C.viPrintf((C.ViSession)(instr),
-// 		cwriteFmt,
-// 		(*C.ViVAList)(args)))
-// }
-
-// VPrintf converts, formats, and sends the parameters designated by params
-// to the device or interface as specified by the format string.
-// ViStatus _VI_FUNC  viVPrintf       (ViSession vi, ViString writeFmt, ViVAList params);
-// func (instr Object) VPrintf(writeFmt string, args ...interface{}) Status {
-// 	cwriteFmt := (*C.ViChar)(C.CString(writeFmt))
-// 	defer C.free(unsafe.Pointer(cwriteFmt))
-// 	return Status(C.viVPrintf((C.ViSession)(instr),
-// 		cwriteFmt,
-// 		(*C.ViVAList)(args)))
-// }
+func (instr Object) Printf(writeFmt string, args ...interface{}) Status {
+	cstr := (*C.ViChar)(C.CString(fmt.Sprintf(writeFmt, args)))
+	defer C.free(unsafe.Pointer(cstr))
+	return Status(C.viPrintf((C.ViSession)(instr), cstr))
+}
 
 // SPrintf converts, formats, and sends the parameters (designated by ...)
 // to a user-specified buffer as specified by the format string.
 // ViStatus _VI_FUNCC viSPrintf       (ViSession vi, ViPBuf buf, ViString writeFmt, ...);
+func (instr Object) SPrintf(buf *uint8, writeFmt string, args ...interface{}) Status {
+	cstr := (*C.ViChar)(C.CString(fmt.Sprintf(writeFmt, args)))
+	defer C.free(unsafe.Pointer(cstr))
+	return Status(C.viSPrintf((C.ViSession)(instr),
+		(*C.ViUInt8)(unsafe.Pointer(buf)), cstr))
+}
 
 // VSPrintf converts, formats, and sends the parameters designated by params
 // to a user-specified buffer as specified by the format string.
