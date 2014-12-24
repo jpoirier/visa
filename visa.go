@@ -127,9 +127,7 @@ func (rm Session) ParseRsrc(rsrcName string) (intfType, intfNum uint16, status S
 }
 
 // ParseRsrcEx parses a resource string to get extended interface information.
-func (rm Session) ParseRsrcEx(rsrcName string) (intfType, intfNum uint16,
-	rsrcClass, expandedUnaliasedName, aliasIfExists string, status Status) {
-
+func (rm Session) ParseRsrcEx(rsrcName string) (intfType, intfNum uint16, rsrcClass, expandedUnaliasedName, aliasIfExists string, status Status) {
 	crsrcName := (*C.ViChar)(C.CString(rsrcName))
 	defer C.free(unsafe.Pointer(crsrcName))
 	r := make([]byte, 257)
@@ -233,7 +231,6 @@ func (instr Object) Unlock() Status {
 
 // EnableEvent enables notification of a specified event.
 func (instr Object) EnableEvent(eventType uint32, mechanism uint16, context uint32) Status {
-
 	return Status(C.viEnableEvent((C.ViSession)(instr),
 		(C.ViEventType)(eventType),
 		(C.ViUInt16)(mechanism),
@@ -257,9 +254,7 @@ func (instr Object) DiscardEvents(eventType uint32, mechanism uint16) Status {
 }
 
 // WaitOnEvent waits for an occurrence of the specified event for a given session.
-func (instr Object) WaitOnEvent(inEventType, timeout uint32) (outEventType,
-	outContext uint32, status Status) {
-
+func (instr Object) WaitOnEvent(inEventType, timeout uint32) (outEventType, outContext uint32, status Status) {
 	status = Status(C.viWaitOnEvent((C.ViSession)(instr),
 		(C.ViEventType)(inEventType),
 		(C.ViUInt32)(timeout),
@@ -569,9 +564,7 @@ func (instr Object) MoveOut32(space uint16, offset BusAddress, length BusSize, b
 }
 
 // Move moves a block of data.
-func (instr Object) Move(srcSpace uint16, srcOffset BusAddress, srcWidth uint16, destSpace uint16,
-	destOffset BusAddress, destWidth uint16, srcLength BusSize) Status {
-
+func (instr Object) Move(srcSpace uint16, srcOffset BusAddress, srcWidth uint16, destSpace uint16, destOffset BusAddress, destWidth uint16, srcLength BusSize) Status {
 	return Status(C.viMove((C.ViSession)(instr),
 		(C.ViUInt16)(srcSpace),
 		(C.ViBusAddress)(srcOffset),
@@ -583,9 +576,7 @@ func (instr Object) Move(srcSpace uint16, srcOffset BusAddress, srcWidth uint16,
 }
 
 // MoveAsync moves a block of data asynchronously.
-func (instr Object) MoveAsync(srcSpace uint16, srcOffset BusAddress, srcWidth, destSpace uint16,
-	destOffset BusAddress, destWidth uint16, srcLength BusSize) (jobId uint32, status Status) {
-
+func (instr Object) MoveAsync(srcSpace uint16, srcOffset BusAddress, srcWidth, destSpace uint16, destOffset BusAddress, destWidth uint16, srcLength BusSize) (jobId uint32, status Status) {
 	status = Status(C.viMoveAsync((C.ViSession)(instr),
 		(C.ViUInt16)(srcSpace),
 		(C.ViBusAddress)(srcOffset),
@@ -599,9 +590,7 @@ func (instr Object) MoveAsync(srcSpace uint16, srcOffset BusAddress, srcWidth, d
 }
 
 // MapAddress maps the specified memory space into the process’s address space.
-func (instr Object) MapAddress(mapSpace uint16, mapOffset BusAddress, mapSize BusSize,
-	access uint16, suggested *byte) (address *byte, status Status) {
-
+func (instr Object) MapAddress(mapSpace uint16, mapOffset BusAddress, mapSize BusSize, access uint16, suggested *byte) (address *byte, status Status) {
 	status = Status(C.viMapAddress((C.ViSession)(instr),
 		(C.ViUInt16)(mapSpace),
 		(C.ViBusAddress)(mapOffset),
@@ -749,9 +738,7 @@ func (instr Object) UnmapTrigger(trigSrc, trigDest int16) Status {
 }
 
 // UsbControlOut performs a USB control pipe transfer to the device.
-func (instr Object) UsbControlOut(bmRequestType, bRequest int16, wValue, wIndex,
-	wLength uint16, buf []byte) Status {
-
+func (instr Object) UsbControlOut(bmRequestType, bRequest int16, wValue, wIndex, wLength uint16, buf []byte) Status {
 	return Status(C.viUsbControlOut((C.ViSession)(instr),
 		(C.ViInt16)(bmRequestType),
 		(C.ViInt16)(bRequest),
@@ -762,9 +749,7 @@ func (instr Object) UsbControlOut(bmRequestType, bRequest int16, wValue, wIndex,
 }
 
 // UsbControlIn performs a USB control pipe transfer from the device.
-func (instr Object) UsbControlIn(bmRequestType, bRequest int16, wValue, wIndex,
-	wLength uint16) (buf []byte, retCnt uint16, status Status) {
-
+func (instr Object) UsbControlIn(bmRequestType, bRequest int16, wValue, wIndex, wLength uint16) (buf []byte, retCnt uint16, status Status) {
 	buf = make([]byte, wLength)
 	status = Status(C.viUsbControlIn((C.ViSession)(instr),
 		(C.ViInt16)(bmRequestType),

@@ -34,8 +34,8 @@ Usage
 All functions in libvisa are accessible from the gortlsdr package:
 
     go get -u github.com/jpoirier/visa
-    go get -u github.com/jpoirier/mxa
-    go get -u github.com/jpoirier/keithley
+    go get -u github.com/jpoirier/visa/mxa
+    go get -u github.com/jpoirier/visa/keithley
 
 Example
 -------
