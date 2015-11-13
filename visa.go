@@ -229,8 +229,7 @@ func (instr Object) LockExclusive(lockType, timeout uint32) Status {
 }
 
 // Lock establishes an access mode to the specified resource.
-func (instr Object) Lock(lockType, timeout uint32, requestedKey string)
-	(string, Status) {
+func (instr Object) Lock(lockType, timeout uint32, requestedKey string) (string, Status) {
 
 	rk := (*C.ViChar)(C.CString(requestedKey))
 	defer C.free(unsafe.Pointer(rk))
