@@ -50,6 +50,14 @@ extern void go_cb(ViSession, ViEventType, ViEvent, ViAddr);
 ViHndlr get_go_cb(void) {
 	return (ViHndlr)go_cb;
 }
+
+ViStatus vi_printf(ViSession vi, ViString string) {
+	return viPrintf(vi, string);
+}
+
+ViStatus vi_sprintf(ViSession vi, ViPBuf buf, ViString string) {
+	return viSPrintf(vi, buf, string);
+}
 */
 import "C"
 import (
@@ -408,7 +416,7 @@ func (instr Object) BufRead(cnt uint32) (buf []byte, retCnt uint32, status Statu
 func (instr Object) Printf(writeFmt string, args ...interface{}) Status {
 	cstr := (*C.ViChar)(C.CString(fmt.Sprintf(writeFmt, args...)))
 	defer C.free(unsafe.Pointer(cstr))
-	return Status(C.viPrintf((C.ViSession)(instr), cstr))
+	return Status(C.vi_printf((C.ViSession)(instr), cstr))
 }
 
 // SPrintf converts, formats, and sends the parameters (designated by args)
@@ -416,7 +424,7 @@ func (instr Object) Printf(writeFmt string, args ...interface{}) Status {
 func (instr Object) SPrintf(buf *uint8, writeFmt string, args ...interface{}) Status {
 	cstr := (*C.ViChar)(C.CString(fmt.Sprintf(writeFmt, args)))
 	defer C.free(unsafe.Pointer(cstr))
-	return Status(C.viSPrintf((C.ViSession)(instr),
+	return Status(C.vi_sprintf((C.ViSession)(instr),
 		(*C.ViByte)(unsafe.Pointer(buf)), cstr))
 }
 
