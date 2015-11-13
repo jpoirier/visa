@@ -35,12 +35,12 @@
 package visa
 
 /*
-#cgo amd64 linux LDFLAGS: -lvisa
+#cgo amd64 linux LDFLAGS: -L/usr/local/lib64 -lvisa
 #cgo darwin LDFLAGS: -framework VISA
 #cgo windows LDFLAGS: -lvisa
-#cgo 386 linux LDFLAGS: -lvisa
+#cgo 386 linux LDFLAGS: -L/usr/local/lib -lvisa
 #cgo 386 darwin LDFLAGS: -framework VISA
-//#cgo 386 windows LDFLAGS: -lvisa
+#cgo 386 windows LDFLAGS: -lvisa
 #cgo CFLAGS: -I.
 
 #include <stdlib.h>
@@ -65,7 +65,7 @@ import (
 	"unsafe"
 )
 
-var PackageVersion string = "v0.1"
+var PackageVersion string = "v0.2"
 
 type Driver interface {
 	Close() Status
@@ -430,30 +430,30 @@ func (instr Object) SPrintf(buf *uint8, writeFmt string, args ...interface{}) St
 
 // Scanf reads, converts, and formats data using the format specifier.
 // Stores the formatted data in the parameters (designated by ...).
-// ViStatus _VI_FUNCC viScanf         (ViSession vi, ViString readFmt, ...);
+// ViStatus _VI_FUNCC viScanf(ViSession vi, ViString readFmt, ...);
 
 // VScanf reads, converts, and formats data using the format specifier.
 // Stores the formatted data in the parameters designated by params.
-// ViStatus _VI_FUNC  viVScanf        (ViSession vi, ViString readFmt, ViVAList params);
+// ViStatus _VI_FUNC  viVScanf(ViSession vi, ViString readFmt, ViVAList params);
 
 // SScanf reads, converts, and formats data from a user-specified buffer
 // using the format specifier. Stores the formatted data in the parameters
 // (designated by ...).
-// ViStatus _VI_FUNCC viSScanf        (ViSession vi, ViBuf buf, ViString readFmt, ...);
+// ViStatus _VI_FUNCC viSScanf(ViSession vi, ViBuf buf, ViString readFmt, ...);
 
 // VSScanf reads, converts, and formats data from a user-specified buffer
 // using the format specifier. Stores the formatted data in the parameters
 // designated by params.
-// ViStatus _VI_FUNC  viVSScanf       (ViSession vi, ViBuf buf, ViString readFmt,
+// ViStatus _VI_FUNC  viVSScanf(ViSession vi, ViBuf buf, ViString readFmt,
 //                                     ViVAList parms);
 
 // Queryf performs a formatted write and read through a single call
 // to an operation.
-// ViStatus _VI_FUNCC viQueryf        (ViSession vi, ViString writeFmt, ViString readFmt, ...);
+// ViStatus _VI_FUNCC viQueryf(ViSession vi, ViString writeFmt, ViString readFmt, ...);
 
 // VQueryf performs a formatted write and read through a single call
 // to an operation.
-// ViStatus _VI_FUNC  viVQueryf       (ViSession vi, ViString writeFmt, ViString readFmt,
+// ViStatus _VI_FUNC  viVQueryf(ViSession vi, ViString writeFmt, ViString readFmt,
 //                                     ViVAList params);
 
 // ----------------------------------------------------------------------------
