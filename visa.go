@@ -29,18 +29,13 @@
 //     Shared Memory Operations
 //     Interface Specific Operations
 
-// For Windows builds, a) mingw-gcc doesn't like _MSC_VER; b) setting the -L
-// path doesn't seem to work nor does setting #cgo 386.
-
 package visa
 
 /*
-#cgo amd64 linux LDFLAGS: -lvisa
+#cgo linux LDFLAGS: -lvisa
 #cgo darwin LDFLAGS: -framework VISA
-#cgo windows LDFLAGS: -lvisa
-#cgo 386 linux LDFLAGS: -lvisa
-#cgo 386 darwin LDFLAGS: -framework VISA
-#cgo 386 windows LDFLAGS: -lvisa
+#cgo windows LDFLAGS: -lvisa64 -L.
+#cgo windows CFLAGS: -IC:/Program\ Files/IVI\ Foundation/VISA/Win64/Include
 #cgo CFLAGS: -I.
 
 #include <stdlib.h>

@@ -47,24 +47,21 @@ See the examples folder:
 Windows
 =======
 
-Building visa on Windows
-------------------------
+Building the visa package on Windows
+------------------------------------
 
 Additional dependencies to build the visa wrapper
 
 * [mingw-w64] (http://sourceforge.net/projects/mingw-w64/?source=recommended)
 
 
-A example workaround for building on Windows (e.g. 64 bit Windows 7) when having NI Visa include and/or library path problems: 
+An example Windows build: 
 
     - install Go
     - install the latest NI Visa tools, e.g. version 16
-    - install a 64 bit GCC via http://tdm-gcc.tdragon.net/download, add C:\TDM-GCC-64\bin to PATH
+    - install a 64 bit GCC via mingw-w64 and put mingw-w64's bin folder in your PATH
     - go get -d github.com/jpoirier/visa
-    - copy visa.h, visatype.h, vpptype.h from C:/Program Files/National Instruments/shared/CompilerSupport/c/Include to %GOPATH%/src/github.com/jpoirier/visa
-    - make a directory in your gopath for the visa dll, e.g. if GOPATH=C:/users/jsmith/gopath then, mkdir %GOPATH%/windows_libs
-    - copy visa64.dll (or visa32.dll if on a 32 bit system) from C:/Windows/System32 to C:/users/jsmith/gopath/windows_libs
-    - edit visa.go, change: #cgo windows LDFLAGS: -lvisa  to: #cgo windows LDFLAGS: -lvisaXX -LC:/users/jsmith/gopath/windows_libs where visaXX is visa32 or visa64
-    - open a Window's shell in %GOPATH%/src/github.com/jpoirier/visa
-    - run: go build -o %GOPATH%/pkg/windows_amd64/github.com/jpoirier/visa.a visa.go exports.go defs.go
-    - from a shell window cd to visa/examples and: go run FindRsrc.go
+    - copy C:\Program Files\IVI Foundation\VISA\Win64\Lib_x64\msc\visa64.lib to the same folder as the visa package files
+    - open a Window's shell in the visa package folder
+    - run:> go build -o %GOPATH%/pkg/windows_amd64/github.com/jpoirier/visa.a -ldflags "-linkmode external -extldflags -static" visa.go exports.go defs.go
+    - cd to examples and run:> go run FindRsrc.go
