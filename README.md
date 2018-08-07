@@ -58,10 +58,10 @@ Additional dependencies to build the visa wrapper
 An example Windows build: 
 
     - install Go
-    - install the latest NI Visa tools, e.g. version 16
+    - install the latest NI Visa drivers
     - install a 64 bit GCC via mingw-w64 and put mingw-w64's bin folder in your PATH
-    - go get -d github.com/jpoirier/visa
-    - copy C:\Program Files\IVI Foundation\VISA\Win64\Lib_x64\msc\visa64.lib to the same folder as the visa package files
-    - open a Window's shell in the visa package folder
-    - run:> go build -o %GOPATH%/pkg/windows_amd64/github.com/jpoirier/visa.a -ldflags "-linkmode external -extldflags -static" visa.go exports.go defs.go
-    - cd to examples and run:> go run FindRsrc.go
+    - open a Windows shell and run> go get -d github.com/jpoirier/visa
+    - copy C:\Program Files\IVI Foundation\VISA\Win64\Lib_x64\msc\visa64.lib to the same folder as the visa package source files
+    - open a Windows shell in the visa package folder
+    - run> go build -o %GOPATH%/pkg/windows_amd64/github.com/jpoirier/visa.a -ldflags "-linkmode external -extldflags -static" visa.go exports.go defs.go
+    - cd to examples and run> go run FindRsrc.go
