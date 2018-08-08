@@ -33,7 +33,7 @@ func main() {
 	instr.SetScreenTitle("MXA Example")
 	instr.ShowSpectrumAnalyzer()
 	time.Sleep(10 * time.Second)
-	instr.ShowLTE_ACP()
+	instr.ShowLTEACP()
 	time.Sleep(10 * time.Second)
 	fmt.Println("Closing Sessions...")
 }

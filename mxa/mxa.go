@@ -235,7 +235,8 @@ func (d *Driver) SetMarkerModeDelta(marker, relMarker uint32) (status vi.Status)
 	if status < vi.SUCCESS {
 		return
 	}
-	b = fmt.Sprintf("CALC:MARK%d:REF %d", relMarker)
+	// FIXME: REF value
+	b = fmt.Sprintf("CALC:MARK%d:REF %d", relMarker, 0)
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
@@ -312,7 +313,7 @@ func (d *Driver) SetMarkerFuncOff(marker uint32) (status vi.Status) {
 
 // SetMarkerFuncBandSpanMHz Sets marker to band adjust span mhz.
 func (d *Driver) SetMarkerFuncBandSpanMHz(marker, mhz uint32) (status vi.Status) {
-	b := fmt.Sprintf("CALC:MARK%d:FUNC:BAND:SPAN %f MHZ", marker, mhz)
+	b := fmt.Sprintf("CALC:MARK%d:FUNC:BAND:SPAN %f MHZ", marker, float32(mhz))
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
@@ -333,7 +334,7 @@ func (d *Driver) SetAllMarkersOff() (status vi.Status) {
 
 // SetMarkerXValMHz Sets marker X-Axis value to mhz.
 func (d *Driver) SetMarkerXValMHz(marker, mhz uint32) (status vi.Status) {
-	b := fmt.Sprintf("CALC:MARK%d:X %f MHZ", marker, mhz)
+	b := fmt.Sprintf("CALC:MARK%d:X %f MHZ", marker, float32(mhz))
 	_, status = d.Write([]byte(b), uint32(len(b)))
 	return
 }
@@ -462,8 +463,8 @@ func (d *Driver) SaveSpectogram(filename string) (status vi.Status) {
 	return
 }
 
-// ShowLTE_ACP Sets LTE mode and ACP measurement screen on.
-func (d *Driver) ShowLTE_ACP() (status vi.Status) {
+// ShowLTEACP Sets LTE mode and ACP measurement screen on.
+func (d *Driver) ShowLTEACP() (status vi.Status) {
 	b := []byte("INST LTE")
 	_, status = d.Write(b, uint32(len(b)))
 	if status < vi.SUCCESS {
