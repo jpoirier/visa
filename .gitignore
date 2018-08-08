@@ -24,5 +24,4 @@ _testmain.go
 *.exe
 
 # User stuff
-archives
-/.project
+archives/

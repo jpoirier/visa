@@ -31,7 +31,7 @@ Dependencies
 Usage
 -----
 
-All functions in libvisa are accessible from the visa package:
+All functions in libvisa are accessible from the visagit package:
 
     go get -u github.com/jpoirier/visa
     go get -u github.com/jpoirier/visa/mxa
