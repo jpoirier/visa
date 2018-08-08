@@ -11,6 +11,7 @@ import (
 	vi "github.com/jpoirier/visa"
 )
 
+// Driver holds the VI driver session
 type Driver struct {
 	vi.Driver
 }
@@ -26,8 +27,8 @@ func OpenGpib(rm vi.Session, ctrl, addr, mode, timeout uint32) (*Driver, vi.Stat
 	return &Driver{instr}, status
 }
 
-// OpenTcp Opens a session to the specified resource.
-func OpenTcp(rm vi.Session, ip string, mode, timeout uint32) (*Driver, vi.Status) {
+// OpenTCP Opens a session to the specified resource.
+func OpenTCP(rm vi.Session, ip string, mode, timeout uint32) (*Driver, vi.Status) {
 	if len(ip) == 0 {
 		fmt.Println("Error, empty ip address string.")
 		os.Exit(0)
