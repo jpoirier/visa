@@ -31,7 +31,7 @@ Dependencies
 Usage
 -----
 
-All functions in libvisa are accessible from the gortlsdr package:
+All functions in libvisa are accessible from the visa package:
 
     go get -u github.com/jpoirier/visa
     go get -u github.com/jpoirier/visa/mxa
@@ -55,7 +55,7 @@ Additional dependencies to build the visa wrapper
 * [mingw-w64] (http://sourceforge.net/projects/mingw-w64/?source=recommended)
 
 
-An example Windows build: 
+An example Windows build:
 
     - install Go
     - install the latest NI Visa drivers
